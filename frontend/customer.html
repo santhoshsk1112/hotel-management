@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TN Delights - Guest Order</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Mobile-first overrides for customers */
+        .app-container {
+            display: block;
+            /* Stack everything */
+            height: auto;
+            overflow: visible;
+        }
+
+        .main-content {
+            padding: 1rem;
+            padding-bottom: 80px;
+            /* Space for sticky cart */
+        }
+
+        .menu-grid {
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            /* Smaller cards for mobile */
+            gap: 1rem;
+        }
+
+        .menu-card {
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 0.5rem;
+        }
+
+        .card-img {
+            height: 140px;
+        }
+
+        .card-body {
+            padding: 0.75rem;
+        }
+
+        .sticky-cart-btn {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            left: 1.5rem;
+            background: var(--primary);
+            color: white;
+            padding: 1rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            cursor: pointer;
+            z-index: 100;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+        }
+
+        .sticky-cart-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Table Selection Overlay */
+        #table-entry-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-dark);
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .category-scroll {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+            scrollbar-width: none;
+        }
+
+        .category-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .category-pill {
+            padding: 0.5rem 1rem;
+            background: var(--bg-card);
+            border-radius: 2rem;
+            white-space: nowrap;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .category-pill.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Table Entry Screen -->
+    <div id="table-entry-overlay">
+        <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">🥘</h1>
+        <h1 style="margin-bottom: 1rem;">Welcome to <br><span style="color:var(--primary)">TN Delights</span></h1>
+        <p style="color: var(--text-muted); margin-bottom: 2rem;">Authentic Tamil Nadu Cuisine</p>
+
+        <div class="form-group" style="width: 100%; max-width: 300px;">
+            <label>Name</label>
+            <input type="text" id="add-name" class="form-input" required>
+            <label style="text-align: center;">Enter Your Table Number</label>
+            <input type="number" id="guest-table-num" class="form-input" style="text-align: center; font-size: 1.5rem;"
+                min="1" placeholder="#">
+        </div>
+        <button class="btn btn-primary" onclick="startOrdering()" style="max-width: 300px;">Start Ordering</button>
+    </div>
+
+    <!-- Main Ordering Interface -->
+    <div id="main-interface" style="display: none;">
+        <header
+            style="padding: 1rem; background: var(--bg-card); position: sticky; top: 0; z-index: 10; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-weight: 700;">Table #<span id="display-table-num"></span></div>
+            <button onclick="viewMyOrders()"
+                style="background: transparent; border: 1px solid rgba(255,255,255,0.2); padding: 0.4rem 0.8rem; border-radius: 0.5rem; color: var(--text-main); font-size: 0.8rem;">My
+                Orders</button>
+        </header>
+
+        <div class="main-content">
+            <div id="category-scroll" class="category-scroll">
+                <!-- Categories -->
+            </div>
+
+            <div id="menu-grid" class="menu-grid">
+                <!-- Items -->
+            </div>
+        </div>
+
+        <!-- Float Cart Button -->
+        <div id="sticky-cart" class="sticky-cart-btn fade-in" style="display: none;" onclick="openCartModal()">
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <span
+                    style="background: white; color: var(--primary); padding: 0.2rem 0.5rem; border-radius: 0.5rem; font-size: 0.8rem;"
+                    id="cart-count">0</span>
+                <span>View Cart</span>
+            </div>
+            <span id="cart-float-total">₹0.00</span>
+        </div>
+    </div>
+
+    <!-- Cart Modal -->
+    <div id="cart-modal" class="modal-overlay">
+        <div class="modal" style="display: flex; flex-direction: column; max-height: 80vh;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                <h2>Your Order</h2>
+                <button onclick="closeCartModal()" class="btn" style="width: auto; padding: 0.5rem;">✕</button>
+            </div>
+
+            <div id="cart-items-list" class="cart-items" style="flex: 1; overflow-y: auto;">
+                <!-- Cart Items -->
+            </div>
+
+            <div class="cart-summary"
+                style="margin-top: auto; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                <div
+                    style="display: flex; justify-content: space-between; margin-bottom: 1rem; font-weight: 700; font-size: 1.2rem;">
+                    <span>Total</span>
+                    <span id="cart-modal-total">₹0.00</span>
+                </div>
+                <button class="btn btn-primary" onclick="placeCustomerOrder()">Confirm Order</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Status Modal -->
+    <div id="status-modal" class="modal-overlay">
+        <div class="modal">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                <h2>Table #<span id="status-table-num"></span> Orders</h2>
+                <button onclick="closeStatusModal()" class="btn" style="width: auto; padding: 0.5rem;">✕</button>
+            </div>
+            <div id="my-orders-list" style="max-height: 400px; overflow-y: auto;">
+                <!-- Orders -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/images.js"></script>
+    <script src="js/customer.js"></script>
+</body>
+
+</html>

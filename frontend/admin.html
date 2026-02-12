@@ -1,0 +1,112 @@
+`<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div class="app-container" style="grid-template-columns: 250px 1fr;">
+        <aside class="sidebar">
+            <div class="logo">
+                <span>🛡️ Admin Panel</span>
+            </div>
+            <button class="nav-item active" onclick="showTab('menu')">Menu Management</button>
+            <button class="nav-item" onclick="showTab('orders')">Order History</button>
+            <div style="margin-top: auto;">
+                <button class="nav-item" onclick="logout()">Logout</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <!-- Menu Management Section -->
+            <div id="tab-menu" class="fade-in">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h2>Menu Items</h2>
+                    <button class="btn btn-primary" style="width: auto;" onclick="openAddModal()">+ Add New
+                        Item</button>
+                </div>
+
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="menu-table-body">
+                        <!-- Items -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Order History Section -->
+            <div id="tab-orders" class="fade-in" style="display: none;">
+                <h2 style="margin-bottom: 2rem;">Order History</h2>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Table</th>
+                            <th>Status</th>
+                            <th>Total</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orders-table-body">
+                        <!-- Orders -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Item Modal -->
+    <div id="add-modal" class="modal-overlay">
+        <div class="modal">
+            <h2 style="margin-bottom: 1.5rem">Add Menu Item</h2>
+            <form id="add-item-form">
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" id="add-name" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <input type="text" id="add-desc" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>Price</label>
+                    <input type="number" step="0.01" id="add-price" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="add-category" class="form-input">
+                        <!-- Options -->
+                    </select>
+                </div>
+                <div style="display:flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="button" class="btn" style="background:var(--bg-dark)"
+                        onclick="closeAddModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/billing.js"></script>
+    <script src="js/admin.js"></script>
+    <script>
+        function logout() {
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+
+</html>

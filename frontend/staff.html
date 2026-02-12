@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <span>🍽️ Hotel Dining</span>
+            </div>
+            <div id="category-list">
+                <!-- Categories injected here -->
+            </div>
+            <div style="margin-top: auto;">
+                <button class="btn btn-primary" onclick="showOrdersModal()">View Active Orders</button>
+                <button class="nav-item" onclick="logout()" style="margin-top: 1rem;">Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="header"
+                style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+                <h2 id="page-title">Menu</h2>
+                <div class="search-bar">
+                    <!-- Optional Search -->
+                </div>
+            </div>
+            <div id="menu-grid" class="menu-grid">
+                <!-- Menu Items injected here -->
+            </div>
+        </main>
+
+        <!-- Cart Sidebar -->
+        <aside class="cart-sidebar">
+            <h3>New Order</h3>
+            <div class="table-selector">
+                <label>Table Number</label>
+                <input type="number" id="table-number" class="form-input" min="1" value="1">
+            </div>
+
+            <div id="cart-items" class="cart-items">
+                <!-- Cart items -->
+                <p style="text-align: center; color: var(--text-muted); margin-top: 2rem;">No items selected</p>
+            </div>
+
+            <div class="cart-summary">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; font-weight: 700;">
+                    <span>Total</span>
+                    <span id="cart-total">₹0.00</span>
+                </div>
+                <button class="btn btn-primary" onclick="submitOrder()">Send to Kitchen</button>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Active Orders Modal -->
+    <div id="orders-modal" class="modal-overlay">
+        <div class="modal">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                <h2>Active Orders</h2>
+                <button onclick="closeOrdersModal()" class="btn" style="width: auto;">X</button>
+            </div>
+            <div id="active-orders-list" style="max-height: 400px; overflow-y: auto;">
+                <!-- Active orders -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/images.js"></script>
+    <script src="js/billing.js"></script>
+    <script src="js/staff.js"></script>
+    <script>
+        function logout() {
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+
+</html>

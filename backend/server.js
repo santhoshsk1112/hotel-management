@@ -1,0 +1,113 @@
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+const db = require('./database');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(cors());
+app.use(express.json());
+app.use(express.static(path.join(__dirname, '../frontend')));
+
+// --- LOGIN ---
+app.post('/api/login', (req, res) => {
+    const { username, password } = req.body;
+    db.get("SELECT * FROM users WHERE username = ? AND password = ?", [username, password], (err, row) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (row) {
+            res.json({ success: true, user: { id: row.id, username: row.username, role: row.role } });
+        } else {
+            res.status(401).json({ success: false, message: 'Invalid credentials' });
+        }
+    });
+});
+
+// --- CATEGORIES ---
+app.get('/api/categories', (req, res) => {
+    db.all("SELECT * FROM categories", [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(rows);
+    });
+});
+
+// --- MENU ---
+app.get('/api/menu', (req, res) => {
+    const sql = `SELECT m.*, c.name as category_name 
+                 FROM menu_items m 
+                 LEFT JOIN categories c ON m.category_id = c.id
+                 WHERE m.available = 1`;
+    db.all(sql, [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(rows);
+    });
+});
+
+app.post('/api/menu', (req, res) => {
+    const { name, description, price, category_id } = req.body;
+    const sql = "INSERT INTO menu_items (name, description, price, category_id) VALUES (?, ?, ?, ?)";
+    db.run(sql, [name, description, price, category_id], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ id: this.lastID, message: 'Item added' });
+    });
+});
+
+app.delete('/api/menu/:id', (req, res) => {
+    db.run("DELETE FROM menu_items WHERE id = ?", req.params.id, function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: 'Deleted' });
+    });
+});
+
+// --- ORDERS ---
+app.get('/api/orders', (req, res) => {
+    // Return orders with their items
+    const sql = "SELECT * FROM orders ORDER BY created_at DESC";
+    db.all(sql, [], async (err, orders) => {
+        if (err) return res.status(500).json({ error: err.message });
+
+        // Populate items for each order (inefficient but simple for beginners)
+        const ordersWithItems = await Promise.all(orders.map(async (order) => {
+            return new Promise((resolve, reject) => {
+                db.all(`SELECT oi.*, m.name 
+                         FROM order_items oi 
+                         JOIN menu_items m ON oi.menu_item_id = m.id 
+                         WHERE oi.order_id = ?`, [order.id], (err, items) => {
+                    if (err) reject(err);
+                    else resolve({ ...order, items });
+                });
+            });
+        }));
+        res.json(ordersWithItems);
+    });
+});
+
+app.post('/api/orders', (req, res) => {
+    const { table_number, items } = req.body; // items: [{ menu_item_id, quantity, price }]
+    const total_price = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+    db.run("INSERT INTO orders (table_number, total_price) VALUES (?, ?)", [table_number, total_price], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        const orderId = this.lastID;
+
+        const stmt = db.prepare("INSERT INTO order_items (order_id, menu_item_id, quantity, price) VALUES (?, ?, ?, ?)");
+        items.forEach(item => {
+            stmt.run(orderId, item.menu_item_id, item.quantity, item.price);
+        });
+        stmt.finalize();
+
+        res.json({ success: true, orderId });
+    });
+});
+
+app.put('/api/orders/:id/status', (req, res) => {
+    const { status } = req.body;
+    db.run("UPDATE orders SET status = ? WHERE id = ?", [status, req.params.id], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ success: true });
+    });
+});
+
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+});
