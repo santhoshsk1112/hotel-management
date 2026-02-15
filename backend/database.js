@@ -34,6 +34,7 @@ function initDb() {
             description TEXT,
             price REAL,
             category_id INTEGER,
+            image_url TEXT,
             available INTEGER DEFAULT 1,
             FOREIGN KEY(category_id) REFERENCES categories(id)
         )`);

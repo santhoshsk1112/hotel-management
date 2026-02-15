@@ -2,6 +2,23 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const db = require('./database');
+const multer = require('multer');
+const fs = require('fs');
+
+// Configure Multer for image uploads
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const uploadDir = path.join(__dirname, '../frontend/uploads');
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir);
+        }
+        cb(null, uploadDir);
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname));
+    }
+});
+const upload = multer({ storage });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -43,12 +60,37 @@ app.get('/api/menu', (req, res) => {
     });
 });
 
-app.post('/api/menu', (req, res) => {
+app.post('/api/menu', upload.single('image'), (req, res) => {
     const { name, description, price, category_id } = req.body;
-    const sql = "INSERT INTO menu_items (name, description, price, category_id) VALUES (?, ?, ?, ?)";
-    db.run(sql, [name, description, price, category_id], function (err) {
+    const image_url = req.file ? `/uploads/${req.file.filename}` : null;
+
+    const sql = "INSERT INTO menu_items (name, description, price, category_id, image_url) VALUES (?, ?, ?, ?, ?)";
+    db.run(sql, [name, description, price, category_id, image_url], function (err) {
         if (err) return res.status(500).json({ error: err.message });
         res.json({ id: this.lastID, message: 'Item added' });
+    });
+});
+
+app.put('/api/menu/:id', upload.single('image'), (req, res) => {
+    const { name, description, price, category_id } = req.body;
+    const id = req.params.id;
+
+    // First get existing item to check for old image
+    db.get("SELECT image_url FROM menu_items WHERE id = ?", [id], (err, row) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (!row) return res.status(404).json({ error: 'Item not found' });
+
+        let image_url = row.image_url;
+        if (req.file) {
+            image_url = `/uploads/${req.file.filename}`;
+            // Optional: delete old image file here if desired
+        }
+
+        const sql = "UPDATE menu_items SET name = ?, description = ?, price = ?, category_id = ?, image_url = ? WHERE id = ?";
+        db.run(sql, [name, description, price, category_id, image_url, id], function (err) {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ message: 'Item updated' });
+        });
     });
 });
 

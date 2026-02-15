@@ -49,7 +49,7 @@ function renderMenu(items) {
     grid.innerHTML = items.map(item => `
         <div class="menu-card fade-in" onclick="addToCart(${item.id})">
             <div class="card-img">
-                <img src="${getFoodImage(item.name)}" alt="${item.name}" loading="lazy" onerror="this.src='https://placehold.co/300x200?text=${item.name.substr(0, 4)}'">
+                <img src="${item.image_url || getFoodImage(item.name)}" alt="${item.name}" loading="lazy" onerror="this.src='https://placehold.co/300x200?text=${item.name.substr(0, 4)}'">
             </div>
             <div class="card-body">
                 <h4 class="card-title">${item.name}</h4>

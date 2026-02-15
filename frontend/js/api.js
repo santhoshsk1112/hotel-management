@@ -20,17 +20,25 @@ const api = {
         return res.json();
     },
 
-    addMenuItem: async (item) => {
+    addMenuItem: async (itemData) => {
+        // itemData should be FormData object
         const res = await fetch(`${API_URL}/menu`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(item)
+            body: itemData // No Content-Type header needed for FormData
         });
         return res.json();
     },
 
     deleteMenuItem: async (id) => {
         const res = await fetch(`${API_URL}/menu/${id}`, { method: 'DELETE' });
+        return res.json();
+    },
+
+    updateMenuItem: async (id, itemData) => {
+        const res = await fetch(`${API_URL}/menu/${id}`, {
+            method: 'PUT',
+            body: itemData
+        });
         return res.json();
     },
 

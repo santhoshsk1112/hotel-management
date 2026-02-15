@@ -1,7 +1,7 @@
 services:
   - type: web
-    name: hotel-management
-    env: node
+    name: hotel-management-system
+    runtime: node
     buildCommand: npm install
     startCommand: npm start
     envVars:
