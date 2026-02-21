@@ -82,13 +82,18 @@ function printBill(order) {
                 <span>₹${total.toFixed(2)}</span>
             </div>
 
-            <div style="text-align: center; margin-top: 30px; border-top: 1px dashed #000; padding-top: 15px;">
-                <div style="font-weight: bold; font-size: 14px; margin-bottom: 10px;">Pay Online Scan Here</div>
-                <img src="img/upi_qr.png" style="width: 150px; height: 150px; border: 1px solid #ccc; padding: 5px; border-radius: 8px;" alt="UPI QR">
-                <div style="font-size: 10px; color: #666; margin-top: 5px;">Santhosh Santhosh / santhoss1112@okaxis</div>
+            <div style="text-align: center; margin-top: 30px; border-top: 2px dashed #000; padding-top: 15px;">
+                <div style="font-weight: bold; font-size: 16px; margin-bottom: 5px;">Pay Online Scan Here</div>
+                <div style="font-size: 12px; margin-bottom: 15px; color: #333;">Santhosh Santhosh</div>
+                
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`upi://pay?pa=santhoss1112@okaxis&pn=Santhosh Santhosh&am=${total.toFixed(2)}&cu=INR`)}" 
+                     style="width: 150px; height: 150px; border: 1px solid #000; padding: 10px; background: #fff;" alt="UPI QR">
+                
+                <div style="font-size: 11px; font-weight: bold; margin-top: 10px;">UPI ID: santhoss1112@okaxis</div>
+                <div style="font-size: 10px; color: #666; margin-top: 5px;">Scan with GPay, PhonePe, or Paytm</div>
             </div>
 
-            <div style="text-align: center; margin-top: 20px; font-size: 12px;">
+            <div style="text-align: center; margin-top: 25px; font-size: 12px; font-style: italic;">
                 Thank you! Visit Again.
             </div>
 
