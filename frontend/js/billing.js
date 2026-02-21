@@ -82,7 +82,13 @@ function printBill(order) {
                 <span>₹${total.toFixed(2)}</span>
             </div>
 
-            <div style="text-align: center; margin-top: 30px; font-size: 12px;">
+            <div style="text-align: center; margin-top: 30px; border-top: 1px dashed #000; padding-top: 15px;">
+                <div style="font-weight: bold; font-size: 14px; margin-bottom: 10px;">Pay Online Scan Here</div>
+                <img src="img/upi_qr.png" style="width: 150px; height: 150px; border: 1px solid #ccc; padding: 5px; border-radius: 8px;" alt="UPI QR">
+                <div style="font-size: 10px; color: #666; margin-top: 5px;">Santhosh Santhosh / santhoss1112@okaxis</div>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px; font-size: 12px;">
                 Thank you! Visit Again.
             </div>
 

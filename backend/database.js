@@ -45,8 +45,14 @@ function initDb() {
             table_number INTEGER,
             status TEXT DEFAULT 'Preparing', -- Preparing, Ready, Served, Paid
             total_price REAL,
+            payment_method TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
+
+        // Migration: Add payment_method to orders if it doesn't exist
+        db.run("ALTER TABLE orders ADD COLUMN payment_method TEXT", (err) => {
+            // Ignore error if column already exists
+        });
 
         // Order Items Table
         db.run(`CREATE TABLE IF NOT EXISTS order_items (

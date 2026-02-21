@@ -3,7 +3,7 @@ services:
     name: hotel-management-system
     runtime: node
     buildCommand: npm install
-    startCommand: npm start
+    startCommand: nstartpm 
     envVars:
       - key: PORT
         value: 10000

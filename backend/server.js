@@ -143,8 +143,19 @@ app.post('/api/orders', (req, res) => {
 });
 
 app.put('/api/orders/:id/status', (req, res) => {
-    const { status } = req.body;
-    db.run("UPDATE orders SET status = ? WHERE id = ?", [status, req.params.id], function (err) {
+    const { status, payment_method } = req.body;
+    let sql = "UPDATE orders SET status = ?";
+    let params = [status];
+
+    if (payment_method) {
+        sql += ", payment_method = ?";
+        params.push(payment_method);
+    }
+
+    sql += " WHERE id = ?";
+    params.push(req.params.id);
+
+    db.run(sql, params, function (err) {
         if (err) return res.status(500).json({ error: err.message });
         res.json({ success: true });
     });

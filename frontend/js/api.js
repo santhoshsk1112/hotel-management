@@ -56,11 +56,11 @@ const api = {
         return res.json();
     },
 
-    updateOrderStatus: async (id, status) => {
+    updateOrderStatus: async (id, status, payment_method) => {
         const res = await fetch(`${API_URL}/orders/${id}/status`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status })
+            body: JSON.stringify({ status, payment_method })
         });
         return res.json();
     }

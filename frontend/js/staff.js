@@ -179,7 +179,8 @@ async function loadActiveOrders() {
                 </div>
                 <div style="margin-top: 0.5rem; text-align: right;">
                     <button class="btn" style="width: auto; padding: 0.3rem 0.6rem; font-size: 0.8rem; background: #475569;" onclick='printBill(${JSON.stringify(o)})'>🖨️ Print Bill</button>
-                    <span style="display:inline-block; margin-left:10px; font-weight:bold; color:var(--primary)">₹${o.total_price.toFixed(2)}</span>
+                    <span style="display:inline-block; margin-left:10px; font-weight:bold; color:var(--primary)">₹${(o.total_price * 1.05).toFixed(2)}</span>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">${o.payment_method || ''}</div>
                 </div>
             </div>
         `).join('');

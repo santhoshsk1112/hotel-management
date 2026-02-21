@@ -107,6 +107,28 @@
             color: white;
             border-color: var(--primary);
         }
+
+        .pay-method-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .pay-method-btn.active {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 
@@ -157,6 +179,64 @@
                 <span>View Cart</span>
             </div>
             <span id="cart-float-total">₹0.00</span>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="payment-modal" class="modal-overlay">
+        <div class="modal">
+            <h2 style="margin-bottom: 1.5rem">Pay for Order #<span id="pay-order-id"></span></h2>
+
+            <div id="payment-summary"
+                style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span style="color: var(--text-muted);">Amount</span>
+                    <span id="pay-amount">₹0.00</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span style="color: var(--text-muted);">GST (5%)</span>
+                    <span id="pay-gst">₹0.00</span>
+                </div>
+                <div
+                    style="display: flex; justify-content: space-between; font-weight: 700; color: var(--primary); font-size: 1.1rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.5rem; margin-top: 0.5rem;">
+                    <span>Total Bill</span>
+                    <span id="pay-total">₹0.00</span>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 1rem; font-weight: 600;">Select Payment Method</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem;">
+                    <button class="pay-method-btn" onclick="selectPaymentMethod('GPay')">
+                        <img src="https://www.gstatic.com/images/branding/product/2x/googleg_48dp.png"
+                            style="width: 20px; height: 20px;" alt="GPay">
+                        GPay
+                    </button>
+                    <button class="pay-method-btn" onclick="selectPaymentMethod('PhonePe')">
+                        <span style="font-size: 1.2rem;">🟣</span>
+                        PhonePe
+                    </button>
+                    <button class="pay-method-btn" onclick="selectPaymentMethod('Paytm')">
+                        <span style="font-size: 1.2rem;">🔵</span>
+                        Paytm
+                    </button>
+                </div>
+            </div>
+
+            <div id="qr-container"
+                style="display: none; text-align: center; margin-bottom: 1.5rem; padding: 1rem; background: white; border-radius: 1rem; border: 4px solid var(--primary);">
+                <p style="color: #000; font-weight: 700; margin-bottom: 0.5rem; font-size: 0.9rem;">Scan to Pay securely
+                    with <span id="selected-method-name"></span></p>
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=7299131336@ybl%26pn=TNDelights%26am=10.00"
+                    id="payment-qr" style="width: 150px; height: 150px;" alt="QR Code">
+                <p style="color: #666; font-size: 0.7rem; margin-top: 0.5rem;">TN Delights / 7299131336@ybl</p>
+            </div>
+
+            <div style="display: flex; gap: 1rem;">
+                <button class="btn" onclick="closePaymentModal()" style="background: var(--bg-dark);">Cancel</button>
+                <button class="btn btn-primary" id="confirm-pay-btn" style="flex: 1;" disabled
+                    onclick="confirmPayment()">Confirm Payment</button>
+            </div>
         </div>
     </div>
 

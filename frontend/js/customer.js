@@ -199,3 +199,108 @@ async function viewMyOrders() {
 function closeStatusModal() {
     document.getElementById('status-modal').classList.remove('active');
 }
+
+// --- Payment Logic ---
+let activePaymentOrder = null;
+let selectedMethod = null;
+
+function openPaymentModal(order) {
+    activePaymentOrder = order;
+    document.getElementById('pay-order-id').innerText = order.id;
+
+    const subtotal = order.total_price;
+    const gst = subtotal * 0.05;
+    const total = subtotal + gst;
+
+    document.getElementById('pay-amount').innerText = '₹' + subtotal.toFixed(2);
+    document.getElementById('pay-gst').innerText = '₹' + gst.toFixed(2);
+    document.getElementById('pay-total').innerText = '₹' + total.toFixed(2);
+
+    // Reset modal state
+    selectedMethod = null;
+    document.getElementById('qr-container').style.display = 'none';
+    document.getElementById('confirm-pay-btn').disabled = true;
+    document.querySelectorAll('.pay-method-btn').forEach(b => b.classList.remove('active'));
+
+    document.getElementById('payment-modal').classList.add('active');
+}
+
+function closePaymentModal() {
+    document.getElementById('payment-modal').classList.remove('active');
+}
+
+function selectPaymentMethod(method) {
+    selectedMethod = method;
+    document.querySelectorAll('.pay-method-btn').forEach(btn => {
+        if (btn.innerText.includes(method)) btn.classList.add('active');
+        else btn.classList.remove('active');
+    });
+
+    document.getElementById('selected-method-name').innerText = method;
+
+    // Update QR code data with amount
+    const total = (activePaymentOrder.total_price * 1.05).toFixed(2);
+    const upiLink = `upi://pay?pa=7299131336@ybl&pn=TNDelights&am=${total}&cu=INR`;
+    document.getElementById('payment-qr').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(upiLink)}`;
+
+    document.getElementById('qr-container').style.display = 'block';
+    document.getElementById('confirm-pay-btn').disabled = false;
+}
+
+async function confirmPayment() {
+    if (!activePaymentOrder || !selectedMethod) return;
+
+    try {
+        const res = await api.updateOrderStatus(activePaymentOrder.id, 'Paid', selectedMethod);
+        if (res.success) {
+            alert(`Payment of ₹${(activePaymentOrder.total_price * 1.05).toFixed(2)} received via ${selectedMethod}!`);
+            closePaymentModal();
+            viewMyOrders(); // Refresh status
+        } else {
+            alert('Payment failed');
+        }
+    } catch (e) {
+        alert('Error processing payment');
+    }
+}
+
+// Update viewMyOrders to include "Pay Now" for Served orders
+const originalViewMyOrders = viewMyOrders;
+viewMyOrders = async function () {
+    await originalViewMyOrders();
+    // After original renders, we can potentially modify but it's cleaner to rewrite the map part
+    // Let's just update the list injection logic
+}
+
+async function viewMyOrders() {
+    document.getElementById('status-modal').classList.add('active');
+    document.getElementById('status-table-num').innerText = tableNumber;
+
+    try {
+        const allOrders = await api.getOrders();
+        const myOrders = allOrders.filter(o => o.table_number == tableNumber && o.status !== 'Paid');
+
+        const list = document.getElementById('my-orders-list');
+        if (myOrders.length === 0) {
+            list.innerHTML = '<p style="text-align: center; margin-top: 2rem;">No active orders for this table.</p>';
+            return;
+        }
+
+        list.innerHTML = myOrders.map(o => `
+            <div style="background: rgba(255,255,255,0.05); padding: 1rem; margin-bottom: 1rem; border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.1);">
+                <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem">
+                    <span style="color: var(--text-muted); font-size: 0.8rem;">Order #${o.id}</span>
+                    <span class="status-badge status-${o.status.toLowerCase()}">${o.status}</span>
+                </div>
+                <div style="font-size: 0.95rem; margin-bottom: 0.5rem;">
+                   ${o.items.map(i => `${i.quantity}x ${i.name}`).join(', ')}
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-weight: 700; color: var(--primary);">Total: ₹${(o.total_price * 1.05).toFixed(2)} (inc. GST)</span>
+                    ${o.status === 'Served' ? `<button class="btn btn-primary" style="width: auto; padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick='openPaymentModal(${JSON.stringify(o)})'>Pay Now</button>` : ''}
+                </div>
+            </div>
+        `).join('');
+
+    } catch (e) { console.error(e); }
+}

@@ -144,7 +144,7 @@ async function loadOrderHistory() {
                 <td>#${o.id}</td>
                 <td>${o.table_number}</td>
                 <td><span class="status-badge status-${o.status.toLowerCase()}">${o.status}</span></td>
-                <td>₹${o.total_price ? o.total_price.toFixed(2) : '0.00'}</td>
+                <td>₹${o.total_price ? (o.total_price * 1.05).toFixed(2) : '0.00'} <br> <span style="font-size:0.75rem; color:var(--text-muted)">${o.payment_method || (o.status === 'Paid' ? 'Cash' : '-')}</span></td>
                 <td>
                     <button style="background:none; border:none; cursor:pointer;" onclick='printBill(${JSON.stringify(o)})'>🖨️</button>
                     ${new Date(o.created_at).toLocaleDateString()}
