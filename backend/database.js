@@ -54,6 +54,11 @@ function initDb() {
             // Ignore error if column already exists
         });
 
+        // Migration: Add customer_name to orders if it doesn't exist
+        db.run("ALTER TABLE orders ADD COLUMN customer_name TEXT", (err) => {
+            // Ignore error if column already exists
+        });
+
         // Order Items Table
         db.run(`CREATE TABLE IF NOT EXISTS order_items (
             id INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -120,10 +120,12 @@ function renderCart() {
 async function submitOrder() {
     if (cart.length === 0) return alert('Cart is empty!');
     const tableNum = document.getElementById('table-number').value;
+    const customerName = document.getElementById('customer-name').value;
     if (!tableNum) return alert('Please enter table number');
 
     const orderData = {
         table_number: parseInt(tableNum),
+        customer_name: customerName,
         items: cart.map(i => ({ menu_item_id: i.id, quantity: i.qty, price: i.price }))
     };
 
@@ -164,7 +166,7 @@ async function loadActiveOrders() {
         list.innerHTML = active.map(o => `
             <div style="background: rgba(255,255,255,0.05); padding: 1rem; margin-bottom: 1rem; border-radius: 0.5rem;">
                 <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem">
-                    <strong>Table ${o.table_number}</strong>
+                    <strong>Table ${o.table_number}${o.customer_name ? ` - ${o.customer_name}` : ''}</strong>
                     <span class="status-badge status-${o.status.toLowerCase()}">${o.status}</span>
                 </div>
                 <!-- Dropdown to change status -->

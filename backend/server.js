@@ -125,10 +125,10 @@ app.get('/api/orders', (req, res) => {
 });
 
 app.post('/api/orders', (req, res) => {
-    const { table_number, items } = req.body; // items: [{ menu_item_id, quantity, price }]
+    const { table_number, items, customer_name } = req.body; // items: [{ menu_item_id, quantity, price }]
     const total_price = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-    db.run("INSERT INTO orders (table_number, total_price) VALUES (?, ?)", [table_number, total_price], function (err) {
+    db.run("INSERT INTO orders (table_number, total_price, customer_name) VALUES (?, ?, ?)", [table_number, total_price, customer_name], function (err) {
         if (err) return res.status(500).json({ error: err.message });
         const orderId = this.lastID;
 
