@@ -4,6 +4,7 @@ A premium, easy-to-use web application for managing hotel dining orders.
 
 ## Features
 - **Staff Interface**: Take orders, view menu, track status.
+- **Kitchen Interface**: Dedicated view for chefs to track and fulfill orders.
 - **Admin Interface**: Manage menu items, view sales history.
 - **Backend**: Node.js + Express + SQLite (Database).
 - **Design**: Modern Glassmorphism UI.
@@ -27,9 +28,11 @@ The backend handles the database and API.
    ```
    *The server runs on http://localhost:3000*
 
-### 2. Run the Frontend
+### 2. Run the App
 1. Go to the `frontend` folder.
-2. Open `index.html` in your web browser.
+2. **Staff Dash**: Open `staff.html`.
+3. **Kitchen Dash**: Open `kitchen.html`.
+4. **Guest View**: Open `customer.html`.
 
 ## Login Credentials
 - **Admin**:
