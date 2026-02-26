@@ -170,11 +170,23 @@ function closeOrdersModal() {
 }
 
 function showKitchenModal() {
-    document.getElementById('kitchen-modal').classList.add('active');
+    console.log("Showing Kitchen Modal...");
+    const modal = document.getElementById('kitchen-modal');
+    if (modal) {
+        modal.classList.add('active');
+        modal.style.display = 'flex'; // Force display just in case
+    } else {
+        console.error("Kitchen modal element not found!");
+    }
 }
 
 function closeKitchenModal() {
-    document.getElementById('kitchen-modal').classList.remove('active');
+    console.log("Closing Kitchen Modal...");
+    const modal = document.getElementById('kitchen-modal');
+    if (modal) {
+        modal.classList.remove('active');
+        modal.style.display = 'none';
+    }
 }
 
 async function loadActiveOrders(isInitial = false) {
