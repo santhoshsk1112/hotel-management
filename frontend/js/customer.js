@@ -153,6 +153,7 @@ async function placeCustomerOrder() {
     const orderData = {
         table_number: parseInt(tableNumber),
         customer_name: customerName,
+        status: 'Pending',
         items: cart.map(i => ({ menu_item_id: i.id, quantity: i.qty, price: i.price }))
     };
 

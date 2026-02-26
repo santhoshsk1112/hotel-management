@@ -125,10 +125,11 @@ app.get('/api/orders', (req, res) => {
 });
 
 app.post('/api/orders', (req, res) => {
-    const { table_number, items, customer_name } = req.body; // items: [{ menu_item_id, quantity, price }]
+    const { table_number, items, customer_name, status } = req.body; // items: [{ menu_item_id, quantity, price }]
     const total_price = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const orderStatus = status || 'Preparing';
 
-    db.run("INSERT INTO orders (table_number, total_price, customer_name) VALUES (?, ?, ?)", [table_number, total_price, customer_name], function (err) {
+    db.run("INSERT INTO orders (table_number, total_price, customer_name, status) VALUES (?, ?, ?, ?)", [table_number, total_price, customer_name, orderStatus], function (err) {
         if (err) return res.status(500).json({ error: err.message });
         const orderId = this.lastID;
 
@@ -158,6 +159,32 @@ app.put('/api/orders/:id/status', (req, res) => {
     db.run(sql, params, function (err) {
         if (err) return res.status(500).json({ error: err.message });
         res.json({ success: true });
+    });
+});
+
+// Update full order (used by staff to finalize guest drafts)
+app.put('/api/orders/:id', (req, res) => {
+    const { table_number, items, customer_name, status } = req.body;
+    const total_price = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const id = req.params.id;
+
+    db.serialize(() => {
+        db.run("UPDATE orders SET table_number = ?, total_price = ?, customer_name = ?, status = ? WHERE id = ?",
+            [table_number, total_price, customer_name, status || 'Preparing', id], function (err) {
+                if (err) return res.status(500).json({ error: err.message });
+            });
+
+        // Delete old items and insert new ones
+        db.run("DELETE FROM order_items WHERE order_id = ?", [id], (err) => {
+            if (err) return res.status(500).json({ error: err.message });
+
+            const stmt = db.prepare("INSERT INTO order_items (order_id, menu_item_id, quantity, price) VALUES (?, ?, ?, ?)");
+            items.forEach(item => {
+                stmt.run(id, item.menu_item_id, item.quantity, item.price);
+            });
+            stmt.finalize();
+            res.json({ success: true, message: 'Order updated' });
+        });
     });
 });
 

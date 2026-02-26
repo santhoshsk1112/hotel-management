@@ -56,6 +56,15 @@ const api = {
         return res.json();
     },
 
+    updateOrder: async (id, order) => {
+        const res = await fetch(`${API_URL}/orders/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(order)
+        });
+        return res.json();
+    },
+
     updateOrderStatus: async (id, status, payment_method) => {
         const res = await fetch(`${API_URL}/orders/${id}/status`, {
             method: 'PUT',

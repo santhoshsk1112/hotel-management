@@ -1,6 +1,7 @@
 let cart = [];
 let allMenuItems = [];
 let currentCategory = 'All';
+let editingOrderId = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     init();
@@ -130,15 +131,25 @@ async function submitOrder() {
     const orderData = {
         table_number: parseInt(tableNum),
         customer_name: customerName,
+        status: 'Preparing', // Finalizing the order
         items: cart.map(i => ({ menu_item_id: i.id, quantity: i.qty, price: i.price }))
     };
 
     try {
-        const res = await api.createOrder(orderData);
+        let res;
+        if (editingOrderId) {
+            res = await api.updateOrder(editingOrderId, orderData);
+        } else {
+            res = await api.createOrder(orderData);
+        }
+
         if (res.success) {
-            alert('Order sent to kitchen!');
+            alert(editingOrderId ? 'Order finalized!' : 'Order sent to kitchen!');
             cart = [];
+            editingOrderId = null;
+            document.getElementById('cancel-edit-btn').style.display = 'none';
             renderCart();
+            await loadActiveOrders();
         } else {
             alert('Failed to send order');
         }
@@ -158,8 +169,9 @@ function closeOrdersModal() {
 async function loadActiveOrders() {
     try {
         const orders = await api.getOrders();
-        // Filter out active
-        const active = orders.filter(o => o.status !== 'Paid');
+        // Filter active vs pending
+        const active = orders.filter(o => o.status !== 'Paid' && o.status !== 'Pending');
+        const pending = orders.filter(o => o.status === 'Pending');
 
         // Update badge
         const badge = document.getElementById('order-count-badge');
@@ -167,6 +179,26 @@ async function loadActiveOrders() {
 
         const listSidebar = document.getElementById('active-orders-list-sidebar');
         const listModal = document.getElementById('active-orders-list');
+        const draftsList = document.getElementById('guest-drafts-list');
+
+        // Render Drafts
+        if (draftsList) {
+            if (pending.length === 0) {
+                draftsList.innerHTML = '<p style="text-align: center; color: var(--text-muted); font-size: 0.8rem;">No pending guest orders</p>';
+            } else {
+                draftsList.innerHTML = pending.map(o => `
+                    <div style="background: white; padding: 0.8rem; margin-bottom: 0.8rem; border-radius: 0.5rem; border-left: 4px solid var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <div style="display:flex; justify-content:space-between; align-items: center; margin-bottom: 0.3rem;">
+                            <strong style="color: #1e293b; font-size: 0.85rem;">T-${o.table_number} ${o.customer_name ? `(${o.customer_name})` : ''}</strong>
+                            <button class="btn btn-primary" style="width: auto; padding: 0.2rem 0.6rem; font-size: 0.75rem;" onclick='reviewGuestOrder(${JSON.stringify(o)})'>Review</button>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #64748b; line-height: 1.2;">
+                            ${o.items.map(i => `${i.quantity}x ${i.name}`).join(', ')}
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
 
         if (active.length === 0) {
             const noOrdersHtml = '<p style="text-align: center; color: var(--text-muted); margin-top: 2rem;">No active orders</p>';
@@ -206,6 +238,37 @@ async function loadActiveOrders() {
         if (listSidebar) listSidebar.innerHTML = ordersHtml;
         if (listModal) listModal.innerHTML = ordersHtml;
     } catch (e) { console.error(e); }
+}
+
+async function reviewGuestOrder(order) {
+    if (cart.length > 0 && !confirm('The current cart will be replaced. Continue?')) return;
+
+    editingOrderId = order.id;
+    document.getElementById('table-number').value = order.table_number;
+    document.getElementById('customer-name').value = order.customer_name || '';
+    document.getElementById('cancel-edit-btn').style.display = 'block';
+
+    // Map order items to cart format
+    cart = order.items.map(item => {
+        // Find full item data from allMenuItems for price/description
+        const fullItem = allMenuItems.find(i => i.id === item.menu_item_id);
+        return {
+            ...fullItem,
+            qty: item.quantity,
+            price: item.price // Use price from order record
+        };
+    });
+
+    renderCart();
+}
+
+function cancelEditing() {
+    editingOrderId = null;
+    cart = [];
+    document.getElementById('table-number').value = 1;
+    document.getElementById('customer-name').value = '';
+    document.getElementById('cancel-edit-btn').style.display = 'none';
+    renderCart();
 }
 
 async function updateStatus(id, status) {
