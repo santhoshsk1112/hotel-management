@@ -142,7 +142,7 @@ async function loadOrderHistory() {
         tbody.innerHTML = orders.map(o => `
             <tr>
                 <td>#${o.id}</td>
-                <td>${o.table_number}</td>
+                <td>${o.table_number}${o.customer_name ? ` (${o.customer_name})` : ''}</td>
                 <td><span class="status-badge status-${o.status.toLowerCase()}">${o.status}</span></td>
                 <td>₹${o.total_price ? (o.total_price * 1.05).toFixed(2) : '0.00'} <br> <span style="font-size:0.75rem; color:var(--text-muted)">${o.payment_method || (o.status === 'Paid' ? 'Cash' : '-')}</span></td>
                 <td>

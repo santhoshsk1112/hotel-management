@@ -39,6 +39,7 @@ function printBill(order) {
             
             <div class="bill-details">
                 <div><strong>Order ID:</strong> #${order.id}</div>
+                <div><strong>Customer:</strong> ${order.customer_name || 'Guest'}</div>
                 <div><strong>Table:</strong> ${order.table_number}</div>
                 <div><strong>Date:</strong> ${date}</div>
             </div>
