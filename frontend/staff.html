@@ -38,39 +38,53 @@
             </div>
         </main>
 
-        <!-- Cart Sidebar -->
-        <aside class="cart-sidebar">
-            <h3>New Order</h3>
-            <div class="table-selector">
-                <label>Customer Name</label>
-                <input type="text" id="customer-name" class="form-input" placeholder="Guest Name">
-                <label style="margin-top: 1rem;">Table Number</label>
-                <input type="number" id="table-number" class="form-input" min="1" value="1">
-            </div>
-
-            <div id="cart-items" class="cart-items">
-                <!-- Cart items -->
-                <p style="text-align: center; color: var(--text-muted); margin-top: 2rem;">No items selected</p>
-            </div>
-
-            <div class="cart-summary">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; font-weight: 700;">
-                    <span>Total</span>
-                    <span id="cart-total">₹0.00</span>
+        <!-- Sidebar with Cart and Active Orders -->
+        <aside class="cart-sidebar" style="display: flex; flex-direction: column; height: 100vh;">
+            <div style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <h3>New Order</h3>
+                <div class="table-selector">
+                    <label>Customer Name</label>
+                    <input type="text" id="customer-name" class="form-input" placeholder="Guest Name">
+                    <label style="margin-top: 1rem;">Table Number</label>
+                    <input type="number" id="table-number" class="form-input" min="1" value="1">
                 </div>
-                <button class="btn btn-primary" onclick="submitOrder()">Send to Kitchen</button>
+
+                <div id="cart-items" class="cart-items" style="max-height: 200px; overflow-y: auto;">
+                    <!-- Cart items -->
+                    <p style="text-align: center; color: var(--text-muted); margin-top: 2rem;">No items selected</p>
+                </div>
+
+                <div class="cart-summary">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; font-weight: 700;">
+                        <span>Total</span>
+                        <span id="cart-total">₹0.00</span>
+                    </div>
+                    <button class="btn btn-primary" onclick="submitOrder()">Send to Kitchen</button>
+                </div>
+            </div>
+
+            <div style="flex: 1; padding: 1rem; overflow-y: auto; background: rgba(0,0,0,0.2);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="margin: 0;">Active Orders</h3>
+                    <span id="order-count-badge"
+                        style="background: var(--primary); color: white; padding: 0.1rem 0.5rem; border-radius: 1rem; font-size: 0.8rem;">0</span>
+                </div>
+                <div id="active-orders-list-sidebar">
+                    <!-- Active orders injected here -->
+                    <p style="text-align: center; color: var(--text-muted); margin-top: 2rem;">No active orders</p>
+                </div>
             </div>
         </aside>
     </div>
 
-    <!-- Active Orders Modal -->
+    <!-- Active Orders Modal (kept for backward compatibility or future use) -->
     <div id="orders-modal" class="modal-overlay">
         <div class="modal">
             <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
                 <h2>Active Orders</h2>
                 <button onclick="closeOrdersModal()" class="btn" style="width: auto;">X</button>
             </div>
-            <div id="active-orders-list" style="max-height: 400px; overflow-y: auto;">
+            <div id="active-orders-list">
                 <!-- Active orders -->
             </div>
         </div>

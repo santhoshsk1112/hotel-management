@@ -10,6 +10,10 @@ async function init() {
     await loadCategories();
     await loadMenu();
     renderCart();
+    await loadActiveOrders();
+
+    // Auto-refresh active orders every 5 seconds
+    setInterval(loadActiveOrders, 5000);
 }
 
 async function loadCategories() {
@@ -157,35 +161,50 @@ async function loadActiveOrders() {
         // Filter out active
         const active = orders.filter(o => o.status !== 'Paid');
 
-        const list = document.getElementById('active-orders-list');
+        // Update badge
+        const badge = document.getElementById('order-count-badge');
+        if (badge) badge.innerText = active.length;
+
+        const listSidebar = document.getElementById('active-orders-list-sidebar');
+        const listModal = document.getElementById('active-orders-list');
+
         if (active.length === 0) {
-            list.innerHTML = '<p>No active orders</p>';
+            const noOrdersHtml = '<p style="text-align: center; color: var(--text-muted); margin-top: 2rem;">No active orders</p>';
+            if (listSidebar) listSidebar.innerHTML = noOrdersHtml;
+            if (listModal) listModal.innerHTML = noOrdersHtml;
             return;
         }
 
-        list.innerHTML = active.map(o => `
-            <div style="background: rgba(255,255,255,0.05); padding: 1rem; margin-bottom: 1rem; border-radius: 0.5rem;">
-                <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem">
-                    <strong>Table ${o.table_number}${o.customer_name ? ` - ${o.customer_name}` : ''}</strong>
-                    <span class="status-badge status-${o.status.toLowerCase()}">${o.status}</span>
+        const ordersHtml = active.map(o => `
+            <div style="background: rgba(255,255,255,0.08); padding: 0.8rem; margin-bottom: 0.8rem; border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.05);">
+                <div style="display:flex; justify-content:space-between; margin-bottom:0.4rem; align-items: center;">
+                    <strong style="font-size: 0.9rem;">T-${o.table_number}${o.customer_name ? ` (${o.customer_name})` : ''}</strong>
+                    <span class="status-badge status-${o.status.toLowerCase()}" style="font-size: 0.7rem; padding: 0.1rem 0.4rem;">${o.status}</span>
                 </div>
-                <!-- Dropdown to change status -->
-                <select onchange="updateStatus(${o.id}, this.value)" style="background: #334155; color: white; border: none; padding: 0.25rem;">
-                    <option value="Preparing" ${o.status === 'Preparing' ? 'selected' : ''}>Preparing</option>
-                    <option value="Ready" ${o.status === 'Ready' ? 'selected' : ''}>Ready</option>
-                    <option value="Served" ${o.status === 'Served' ? 'selected' : ''}>Served</option>
-                    <option value="Paid" ${o.status === 'Paid' ? 'selected' : ''}>Paid</option>
-                </select>
-                <div style="margin-top:0.5rem; font-size: 0.9rem; color: var(--text-muted)">
+                
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <select onchange="updateStatus(${o.id}, this.value)" style="background: #1e293b; color: white; border: 1px solid rgba(255,255,255,0.1); padding: 0.2rem; font-size: 0.8rem; border-radius: 0.3rem; flex: 1;">
+                        <option value="Preparing" ${o.status === 'Preparing' ? 'selected' : ''}>Preparing</option>
+                        <option value="Ready" ${o.status === 'Ready' ? 'selected' : ''}>Ready</option>
+                        <option value="Served" ${o.status === 'Served' ? 'selected' : ''}>Served</option>
+                        <option value="Paid" ${o.status === 'Paid' ? 'selected' : ''}>Paid</option>
+                    </select>
+                    <button class="btn" style="width: auto; padding: 0.2rem 0.5rem; font-size: 0.7rem; background: #334155; border: 1px solid rgba(255,255,255,0.1);" onclick='printBill(${JSON.stringify(o)})'>🖨️</button>
+                </div>
+
+                <div style="margin-top:0.4rem; font-size: 0.8rem; color: var(--text-muted); line-height: 1.2;">
                    ${o.items.map(i => `${i.quantity}x ${i.name}`).join(', ')}
                 </div>
-                <div style="margin-top: 0.5rem; text-align: right;">
-                    <button class="btn" style="width: auto; padding: 0.3rem 0.6rem; font-size: 0.8rem; background: #475569;" onclick='printBill(${JSON.stringify(o)})'>🖨️ Print Bill</button>
-                    <span style="display:inline-block; margin-left:10px; font-weight:bold; color:var(--primary)">₹${(o.total_price * 1.05).toFixed(2)}</span>
-                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">${o.payment_method || ''}</div>
+                
+                <div style="margin-top: 0.4rem; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.7rem; color: var(--text-muted);">${o.payment_method || ''}</span>
+                    <span style="font-weight:bold; color:var(--primary); font-size: 0.9rem;">₹${(o.total_price * 1.05).toFixed(2)}</span>
                 </div>
             </div>
         `).join('');
+
+        if (listSidebar) listSidebar.innerHTML = ordersHtml;
+        if (listModal) listModal.innerHTML = ordersHtml;
     } catch (e) { console.error(e); }
 }
 
