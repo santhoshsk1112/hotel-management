@@ -174,7 +174,6 @@ function showKitchenModal() {
 }
 
 function closeKitchenModal() {
-    document.getElementById('kitchen-modal').classList.remove('remove'); // Actually toggle class
     document.getElementById('kitchen-modal').classList.remove('active');
 }
 
