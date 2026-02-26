@@ -12,7 +12,7 @@ async function init() {
     await loadCategories();
     await loadMenu();
     renderCart();
-    await loadActiveOrders();
+    await loadActiveOrders(true);
 
     // Auto-refresh active orders every 5 seconds
     setInterval(loadActiveOrders, 5000);
@@ -149,6 +149,8 @@ async function submitOrder() {
             cart = [];
             editingOrderId = null;
             document.getElementById('cancel-edit-btn').style.display = 'none';
+            const header = document.getElementById('sidebar-cart-header');
+            if (header) header.innerText = `New Order`;
             renderCart();
             await loadActiveOrders();
         } else {
@@ -167,19 +169,34 @@ function closeOrdersModal() {
     document.getElementById('orders-modal').classList.remove('active');
 }
 
-async function loadActiveOrders() {
+async function loadActiveOrders(isInitial = false) {
     try {
         const orders = await api.getOrders();
         // Filter active vs pending
         const active = orders.filter(o => o.status !== 'Paid' && o.status !== 'Pending');
         const pending = orders.filter(o => o.status === 'Pending');
 
-        // Check for new pending orders to trigger notification
-        if (pending.length > lastPendingCount) {
-            playNotificationEffect();
-            showNotification(`New Guest Request from Table ${pending[pending.length - 1].table_number}!`);
+        // Check for new pending orders to trigger notification and auto-load
+        if (pending.length > 0) {
+            const latestPending = pending[pending.length - 1];
+
+            // If there's a new pending order (by ID)
+            if (latestPending.id > lastPendingCount) {
+                if (!isInitial) {
+                    playNotificationEffect();
+                    showNotification(`New Guest Request from Table ${latestPending.table_number}!`);
+
+                    // AUTO-LOAD: If cart is empty and not currently editing, load it!
+                    if (cart.length === 0 && !editingOrderId) {
+                        console.log("Auto-loading guest order:", latestPending.id);
+                        reviewGuestOrder(latestPending);
+                    }
+                }
+                lastPendingCount = latestPending.id;
+            }
+        } else {
+            lastPendingCount = 0;
         }
-        lastPendingCount = pending.length;
 
         // Update badge
         const badge = document.getElementById('order-count-badge');
@@ -256,6 +273,9 @@ async function reviewGuestOrder(order) {
     document.getElementById('customer-name').value = order.customer_name || '';
     document.getElementById('cancel-edit-btn').style.display = 'block';
 
+    const header = document.getElementById('sidebar-cart-header');
+    if (header) header.innerText = `Reviewing T-${order.table_number}`;
+
     // Map order items to cart format
     cart = order.items.map(item => {
         // Find full item data from allMenuItems for price/description
@@ -276,6 +296,10 @@ function cancelEditing() {
     document.getElementById('table-number').value = 1;
     document.getElementById('customer-name').value = '';
     document.getElementById('cancel-edit-btn').style.display = 'none';
+
+    const header = document.getElementById('sidebar-cart-header');
+    if (header) header.innerText = `New Order`;
+
     renderCart();
 }
 
