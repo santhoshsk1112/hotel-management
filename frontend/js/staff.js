@@ -169,6 +169,15 @@ function closeOrdersModal() {
     document.getElementById('orders-modal').classList.remove('active');
 }
 
+function showKitchenModal() {
+    document.getElementById('kitchen-modal').classList.add('active');
+}
+
+function closeKitchenModal() {
+    document.getElementById('kitchen-modal').classList.remove('remove'); // Actually toggle class
+    document.getElementById('kitchen-modal').classList.remove('active');
+}
+
 async function loadActiveOrders(isInitial = false) {
     try {
         const orders = await api.getOrders();
