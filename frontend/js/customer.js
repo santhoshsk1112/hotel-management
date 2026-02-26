@@ -2,23 +2,27 @@ let cart = [];
 let allMenuItems = [];
 let currentCategory = 'All';
 let tableNumber = null;
+let customerName = null;
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Check if table number exists in session
-    const savedTable = sessionStorage.getItem('tableNumber');
-    if (savedTable) {
-        startOrdering(savedTable);
-    }
-});
+// Check if table number and name exists in session
+const savedTable = sessionStorage.getItem('tableNumber');
+const savedName = sessionStorage.getItem('customerName');
+if (savedTable) {
+    startOrdering(savedTable, savedName);
+}
 
-async function startOrdering(savedTable = null) {
+async function startOrdering(savedTable = null, savedName = null) {
     if (savedTable) {
         tableNumber = savedTable;
+        customerName = savedName;
     } else {
         const input = document.getElementById('guest-table-num').value;
+        const nameInput = document.getElementById('guest-name').value;
         if (!input || input < 1) return alert('Please enter a valid table number');
         tableNumber = input;
+        customerName = nameInput;
         sessionStorage.setItem('tableNumber', tableNumber);
+        sessionStorage.setItem('customerName', customerName);
     }
 
     document.getElementById('table-entry-overlay').style.display = 'none';
@@ -148,6 +152,7 @@ async function placeCustomerOrder() {
 
     const orderData = {
         table_number: parseInt(tableNumber),
+        customer_name: customerName,
         items: cart.map(i => ({ menu_item_id: i.id, quantity: i.qty, price: i.price }))
     };
 
