@@ -2,6 +2,7 @@ let cart = [];
 let allMenuItems = [];
 let currentCategory = 'All';
 let editingOrderId = null;
+let lastPendingCount = 0;
 
 document.addEventListener('DOMContentLoaded', () => {
     init();
@@ -173,6 +174,13 @@ async function loadActiveOrders() {
         const active = orders.filter(o => o.status !== 'Paid' && o.status !== 'Pending');
         const pending = orders.filter(o => o.status === 'Pending');
 
+        // Check for new pending orders to trigger notification
+        if (pending.length > lastPendingCount) {
+            playNotificationEffect();
+            showNotification(`New Guest Request from Table ${pending[pending.length - 1].table_number}!`);
+        }
+        lastPendingCount = pending.length;
+
         // Update badge
         const badge = document.getElementById('order-count-badge');
         if (badge) badge.innerText = active.length;
@@ -274,4 +282,64 @@ function cancelEditing() {
 async function updateStatus(id, status) {
     await api.updateOrderStatus(id, status);
     loadActiveOrders(); // Refresh
+}
+
+function playNotificationEffect() {
+    const sound = document.getElementById('notification-sound');
+    if (sound) {
+        sound.currentTime = 0;
+        sound.play().catch(e => console.log("Audio play blocked: ", e));
+    }
+}
+
+function showNotification(message) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        background: var(--primary);
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 0.5rem;
+        margin-bottom: 0.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        animation: slideIn 0.3s ease-out;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        min-width: 250px;
+    `;
+
+    toast.innerHTML = `
+        <span>🔔 ${message}</span>
+        <button onclick="this.parentElement.remove()" style="background:none; border:none; color:white; cursor:pointer; margin-left:1rem;">✕</button>
+    `;
+
+    container.appendChild(toast);
+
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (toast.parentElement) {
+            toast.style.animation = 'fadeOut 0.3s ease-in forwards';
+            setTimeout(() => toast.remove(), 300);
+        }
+    }, 5000);
+}
+
+// Add these animations to the document if not present
+if (!document.getElementById('notification-styles')) {
+    const styleLine = document.createElement('style');
+    styleLine.id = 'notification-styles';
+    styleLine.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+    `;
+    document.head.appendChild(styleLine);
 }
