@@ -165,12 +165,19 @@ app.put('/api/orders/:id/status', (req, res) => {
             db.get("SELECT o.*, (SELECT GROUP_CONCAT(i.quantity || 'x ' || m.name, ', ') FROM order_items i JOIN menu_items m ON i.menu_item_id = m.id WHERE i.order_id = o.id) as items_summary FROM orders o WHERE o.id = ?", [req.params.id], (err, order) => {
                 if (!err && order) {
                     db.run("INSERT INTO payments (order_id, table_number, customer_name, items, total_price, payment_method) VALUES (?, ?, ?, ?, ?, ?)",
-                        [req.params.id, order.table_number, order.customer_name, order.items_summary, order.total_price, payment_method || order.payment_method || 'Cash']);
+                        [req.params.id, order.table_number, order.customer_name, order.items_summary, order.total_price, payment_method || order.payment_method || 'Cash'],
+                        (archErr) => {
+                            if (archErr) console.error("Archival Error:", archErr);
+                            res.json({ success: true, archived: !archErr });
+                        }
+                    );
+                } else {
+                    res.json({ success: true, archived: false });
                 }
             });
+        } else {
+            res.json({ success: true });
         }
-
-        res.json({ success: true });
     });
 });
 
