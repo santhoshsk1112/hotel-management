@@ -101,6 +101,8 @@ function printBill(order) {
                 Thank you! Visit Again.
             </div>
 
+            <audio id="success-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+
             <script>
                 async function simulatePayment() {
                     const confirmPay = confirm("Simulate Scanner Payment for Order #${order.id}?");
@@ -113,6 +115,11 @@ function printBill(order) {
                             });
                             const data = await res.json();
                             if (data.success) {
+                                // Play notification sound
+                                const sound = document.getElementById('success-sound');
+                                if (sound) {
+                                    sound.play().catch(e => console.log("Sound play error:", e));
+                                }
                                 alert("Payment Successful! Order marked as Paid via Scanner.");
                                 window.close();
                             } else {
