@@ -17,6 +17,7 @@
             </div>
             <button class="nav-item active" onclick="showTab('menu')">Menu Management</button>
             <button class="nav-item" onclick="showTab('orders')">Order History</button>
+            <button class="nav-item" onclick="showTab('payments')">Payment History</button>
             <div style="margin-top: auto;">
                 <button class="nav-item" onclick="logout()">Logout</button>
             </div>
@@ -65,6 +66,58 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Payment History Section -->
+            <div id="tab-payments" class="fade-in" style="display: none;">
+                <h2 style="margin-bottom: 2rem;">Payment Dashboard</h2>
+
+                <!-- Stats Cards -->
+                <div class="stats-container"
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                    <div class="card"
+                        style="padding: 1.5rem; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 4px solid #4CAF50;">
+                        <div style="font-size: 0.875rem; color: #666; margin-bottom: 0.5rem;">Today's Revenue</div>
+                        <div id="stats-today" style="font-size: 1.5rem; font-weight: bold; color: #333;">₹0.00</div>
+                    </div>
+                    <div class="card"
+                        style="padding: 1.5rem; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 4px solid #2196F3;">
+                        <div style="font-size: 0.875rem; color: #666; margin-bottom: 0.5rem;">Weekly Revenue</div>
+                        <div id="stats-weekly" style="font-size: 1.5rem; font-weight: bold; color: #333;">₹0.00</div>
+                    </div>
+                    <div class="card"
+                        style="padding: 1.5rem; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 4px solid #FF9800;">
+                        <div style="font-size: 0.875rem; color: #666; margin-bottom: 0.5rem;">Monthly Revenue</div>
+                        <div id="stats-monthly" style="font-size: 1.5rem; font-weight: bold; color: #333;">₹0.00</div>
+                    </div>
+                    <div class="card"
+                        style="padding: 1.5rem; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 4px solid #9C27B0;">
+                        <div style="font-size: 0.875rem; color: #666; margin-bottom: 0.5rem;">Yearly Revenue</div>
+                        <div id="stats-yearly" style="font-size: 1.5rem; font-weight: bold; color: #333;">₹0.00</div>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3>Recent Payments</h3>
+                    <button class="btn btn-primary" style="width: auto; padding: 0.5rem 1rem;"
+                        onclick="loadPaymentStats(); loadPaymentHistory();">🔄 Refresh</button>
+                </div>
+
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Customer</th>
+                            <th>Total (inc. GST)</th>
+                            <th>Method</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="payments-table-body">
+                        <!-- Payments -->
+                    </tbody>
+                </table>
+            </div>
+
         </main>
     </div>
 

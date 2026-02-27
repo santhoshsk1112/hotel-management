@@ -88,7 +88,10 @@ function printBill(order) {
                 <div style="font-size: 12px; margin-bottom: 15px; color: #333;">Santhosh Santhosh</div>
                 
                 <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`upi://pay?pa=santhoss1112@okaxis&pn=Santhosh Santhosh&am=${total.toFixed(2)}&cu=INR`)}" 
-                     style="width: 150px; height: 150px; border: 1px solid #000; padding: 10px; background: #fff;" alt="UPI QR">
+                     style="width: 150px; height: 150px; border: 1px solid #000; padding: 10px; background: #fff; cursor: pointer;" 
+                     onclick="simulatePayment()"
+                     title="Click to simulate scanner scan"
+                     alt="UPI QR">
                 
                 <div style="font-size: 11px; font-weight: bold; margin-top: 10px;">UPI ID: santhoss1112@okaxis</div>
                 <div style="font-size: 10px; color: #666; margin-top: 5px;">Scan with GPay, PhonePe, or Paytm</div>
@@ -99,7 +102,33 @@ function printBill(order) {
             </div>
 
             <script>
-                window.onload = function() { window.print(); window.close(); }
+                async function simulatePayment() {
+                    const confirmPay = confirm("Simulate Scanner Payment for Order #${order.id}?");
+                    if (confirmPay) {
+                        try {
+                            const res = await fetch('/api/orders/${order.id}/status', {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ status: 'Paid', payment_method: 'Scanner' })
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                alert("Payment Successful! Order marked as Paid via Scanner.");
+                                window.close();
+                            } else {
+                                alert("Payment Failed: " + data.error);
+                            }
+                        } catch (e) {
+                            alert("Error simulating payment: " + e.message);
+                        }
+                    }
+                }
+
+                window.onload = function() {
+                    // We don't auto-print if we want to simulate scanner click in the window
+                    // Actually, let's keep it user-friendly: they can click the QR while the window is open
+                    console.log("Bill loaded. Click QR to simulate scanner payment.");
+                }
             </script>
         </body>
         </html>

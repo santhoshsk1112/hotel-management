@@ -7,9 +7,19 @@ document.addEventListener('DOMContentLoaded', () => {
 function showTab(tabName) {
     document.getElementById('tab-menu').style.display = tabName === 'menu' ? 'block' : 'none';
     document.getElementById('tab-orders').style.display = tabName === 'orders' ? 'block' : 'none';
+    document.getElementById('tab-payments').style.display = tabName === 'payments' ? 'block' : 'none';
 
     document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-    // Simple logic to highlight active, relies on order or text match in real apps, here just simple toggle
+    // Highlight active nav item
+    const navItems = document.querySelectorAll('.nav-item');
+    if (tabName === 'menu') navItems[0].classList.add('active');
+    else if (tabName === 'orders') navItems[1].classList.add('active');
+    else if (tabName === 'payments') navItems[2].classList.add('active');
+
+    if (tabName === 'payments') {
+        loadPaymentStats();
+        loadPaymentHistory();
+    }
 }
 
 async function loadMenuTable() {
@@ -165,3 +175,28 @@ document.getElementById('edit-image').addEventListener('change', function (e) {
         reader.readAsDataURL(file);
     }
 });
+async function loadPaymentStats() {
+    try {
+        const stats = await api.getPaymentStats();
+        document.getElementById('stats-today').innerText = `₹${stats.today.toFixed(2)}`;
+        document.getElementById('stats-weekly').innerText = `₹${stats.weekly.toFixed(2)}`;
+        document.getElementById('stats-monthly').innerText = `₹${stats.monthly.toFixed(2)}`;
+        document.getElementById('stats-yearly').innerText = `₹${stats.yearly.toFixed(2)}`;
+    } catch (e) { console.error(e); }
+}
+
+async function loadPaymentHistory() {
+    try {
+        const payments = await api.getPaymentHistory();
+        const tbody = document.getElementById('payments-table-body');
+        tbody.innerHTML = payments.map(p => `
+            <tr>
+                <td>#${p.id}</td>
+                <td>${p.customer_name || 'Guest'}</td>
+                <td>₹${(p.total_price * 1.05).toFixed(2)}</td>
+                <td><span class="status-badge" style="background:#e8f5e9; color:#2e7d32; padding:0.25rem 0.5rem; border-radius:4px; font-size:0.75rem;">${p.payment_method || 'Paid'}</span></td>
+                <td>${new Date(p.created_at).toLocaleString()}</td>
+            </tr>
+        `).join('');
+    } catch (e) { console.error(e); }
+}

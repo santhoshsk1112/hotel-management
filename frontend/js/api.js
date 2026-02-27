@@ -72,5 +72,15 @@ const api = {
             body: JSON.stringify({ status, payment_method })
         });
         return res.json();
+    },
+
+    getPaymentStats: async () => {
+        const res = await fetch(`${API_URL}/payments/stats`);
+        return res.json();
+    },
+
+    getPaymentHistory: async () => {
+        const res = await fetch(`${API_URL}/payments/history`);
+        return res.json();
     }
 };
