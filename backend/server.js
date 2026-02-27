@@ -158,6 +158,18 @@ app.put('/api/orders/:id/status', (req, res) => {
 
     db.run(sql, params, function (err) {
         if (err) return res.status(500).json({ error: err.message });
+
+        // --- PERMANENT ARCHIVAL ---
+        if (status === 'Paid') {
+            // Fetch order details to archive
+            db.get("SELECT total_price, customer_name, payment_method FROM orders WHERE id = ?", [req.params.id], (err, order) => {
+                if (!err && order) {
+                    db.run("INSERT INTO payments (order_id, customer_name, total_price, payment_method) VALUES (?, ?, ?, ?)",
+                        [req.params.id, order.customer_name, order.total_price, payment_method || order.payment_method || 'Cash']);
+                }
+            });
+        }
+
         res.json({ success: true });
     });
 });
@@ -170,8 +182,7 @@ app.get('/api/payments/stats', (req, res) => {
             SUM(CASE WHEN date(created_at) >= date('now', '-7 days') THEN total_price * 1.05 ELSE 0 END) as weekly,
             SUM(CASE WHEN date(created_at) >= date('now', '-30 days') THEN total_price * 1.05 ELSE 0 END) as monthly,
             SUM(CASE WHEN date(created_at) >= date('now', '-365 days') THEN total_price * 1.05 ELSE 0 END) as yearly
-        FROM orders 
-        WHERE status = 'Paid'
+        FROM payments
     `;
     db.get(sql, [], (err, row) => {
         if (err) return res.status(500).json({ error: err.message });
@@ -185,7 +196,7 @@ app.get('/api/payments/stats', (req, res) => {
 });
 
 app.get('/api/payments/history', (req, res) => {
-    const sql = "SELECT * FROM orders WHERE status = 'Paid' ORDER BY created_at DESC";
+    const sql = "SELECT * FROM payments ORDER BY created_at DESC";
     db.all(sql, [], (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(rows);

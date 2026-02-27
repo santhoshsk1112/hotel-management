@@ -70,6 +70,16 @@ function initDb() {
             FOREIGN KEY(menu_item_id) REFERENCES menu_items(id)
         )`);
 
+        // Permanent Payments Table
+        db.run(`CREATE TABLE IF NOT EXISTS payments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            order_id INTEGER,
+            customer_name TEXT,
+            total_price REAL,
+            payment_method TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
+
         // Seed Data if empty
         db.get("SELECT count(*) as count FROM users", (err, row) => {
             if (row && row.count === 0) {
