@@ -229,6 +229,36 @@ app.get('/api/payments/history', (req, res) => {
     });
 });
 
+// --- ONLINE PAYMENT HISTORY (SCANNER ONLY) ---
+app.get('/api/payments/online/stats', (req, res) => {
+    const sql = `
+        SELECT 
+            SUM(CASE WHEN date(created_at) = date('now') THEN total_price * 1.05 ELSE 0 END) as today,
+            SUM(CASE WHEN date(created_at) >= date('now', '-7 days') THEN total_price * 1.05 ELSE 0 END) as weekly,
+            SUM(CASE WHEN date(created_at) >= date('now', '-30 days') THEN total_price * 1.05 ELSE 0 END) as monthly,
+            SUM(CASE WHEN date(created_at) >= date('now', '-365 days') THEN total_price * 1.05 ELSE 0 END) as yearly
+        FROM payments
+        WHERE payment_method = 'Scanner'
+    `;
+    db.get(sql, [], (err, row) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({
+            today: row.today || 0,
+            weekly: row.weekly || 0,
+            monthly: row.monthly || 0,
+            yearly: row.yearly || 0
+        });
+    });
+});
+
+app.get('/api/payments/online/history', (req, res) => {
+    const sql = "SELECT * FROM payments WHERE payment_method = 'Scanner' ORDER BY created_at DESC";
+    db.all(sql, [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(rows);
+    });
+});
+
 // Update full order (used by staff to finalize guest drafts)
 app.put('/api/orders/:id', (req, res) => {
     const { table_number, items, customer_name, status } = req.body;

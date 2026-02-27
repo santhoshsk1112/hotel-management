@@ -82,5 +82,15 @@ const api = {
     getPaymentHistory: async () => {
         const res = await fetch(`${API_URL}/payments/history`);
         return res.json();
+    },
+
+    getOnlinePaymentStats: async () => {
+        const res = await fetch(`${API_URL}/payments/online/stats`);
+        return res.json();
+    },
+
+    getOnlinePaymentHistory: async () => {
+        const res = await fetch(`${API_URL}/payments/online/history`);
+        return res.json();
     }
 };

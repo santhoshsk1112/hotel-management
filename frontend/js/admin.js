@@ -8,6 +8,7 @@ function showTab(tabName) {
     document.getElementById('tab-menu').style.display = tabName === 'menu' ? 'block' : 'none';
     document.getElementById('tab-orders').style.display = tabName === 'orders' ? 'block' : 'none';
     document.getElementById('tab-payments').style.display = tabName === 'payments' ? 'block' : 'none';
+    document.getElementById('tab-online-payments').style.display = tabName === 'online-payments' ? 'block' : 'none';
 
     document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
     // Highlight active nav item
@@ -15,10 +16,14 @@ function showTab(tabName) {
     if (tabName === 'menu') navItems[0].classList.add('active');
     else if (tabName === 'orders') navItems[1].classList.add('active');
     else if (tabName === 'payments') navItems[2].classList.add('active');
+    else if (tabName === 'online-payments') navItems[3].classList.add('active');
 
     if (tabName === 'payments') {
         loadPaymentStats();
         loadPaymentHistory();
+    } else if (tabName === 'online-payments') {
+        loadOnlinePaymentStats();
+        loadOnlinePaymentHistory();
     }
 }
 
@@ -217,5 +222,30 @@ async function loadPaymentHistory() {
                 </tr>
             `;
         }).join('');
+    } catch (e) { console.error(e); }
+}
+
+async function loadOnlinePaymentStats() {
+    try {
+        const stats = await api.getOnlinePaymentStats();
+        document.getElementById('stats-online-today').innerText = `₹${stats.today.toFixed(2)}`;
+        document.getElementById('stats-online-weekly').innerText = `₹${stats.weekly.toFixed(2)}`;
+        document.getElementById('stats-online-monthly').innerText = `₹${stats.monthly.toFixed(2)}`;
+    } catch (e) { console.error(e); }
+}
+
+async function loadOnlinePaymentHistory() {
+    try {
+        const payments = await api.getOnlinePaymentHistory();
+        const tbody = document.getElementById('online-payments-table-body');
+        tbody.innerHTML = payments.map(p => `
+            <tr>
+                <td>#${p.id}</td>
+                <td>T-${p.table_number || '-'}</td>
+                <td>${p.customer_name || 'Guest'}</td>
+                <td>₹${(p.total_price * 1.05).toFixed(2)}</td>
+                <td>${new Date(p.created_at).toLocaleString()}</td>
+            </tr>
+        `).join('');
     } catch (e) { console.error(e); }
 }
