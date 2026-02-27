@@ -189,16 +189,24 @@ async function loadPaymentHistory() {
     try {
         const payments = await api.getPaymentHistory();
         const tbody = document.getElementById('payments-table-body');
-        tbody.innerHTML = payments.map(p => `
-            <tr>
-                <td>#${p.id}</td>
-                <td>T-${p.table_number || '-'}</td>
-                <td>${p.customer_name || 'Guest'}</td>
-                <td style="font-size: 0.75rem; color: #64748b; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${p.items || ''}">${p.items || '-'}</td>
-                <td>₹${(p.total_price * 1.05).toFixed(2)}</td>
-                <td><span class="status-badge" style="background:#e8f5e9; color:#2e7d32; padding:0.25rem 0.5rem; border-radius:4px; font-size:0.75rem;">${p.payment_method || 'Paid'}</span></td>
-                <td>${new Date(p.created_at).toLocaleString()}</td>
-            </tr>
-        `).join('');
+        tbody.innerHTML = payments.map(p => {
+            const method = p.payment_method || 'Cash';
+            const isScanner = method === 'Scanner';
+            const badgeStyle = isScanner
+                ? 'background: #e0f2fe; color: #0369a1; border: 1px solid #7dd3fc;' // Blue for Scanner
+                : 'background: #f0fdf4; color: #15803d; border: 1px solid #86efac;'; // Green for Cash/Others
+
+            return `
+                <tr>
+                    <td>#${p.id}</td>
+                    <td>T-${p.table_number || '-'}</td>
+                    <td>${p.customer_name || 'Guest'}</td>
+                    <td style="font-size: 0.75rem; color: #64748b; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${p.items || ''}">${p.items || '-'}</td>
+                    <td>₹${(p.total_price * 1.05).toFixed(2)}</td>
+                    <td><span class="status-badge" style="padding:0.25rem 0.5rem; border-radius:4px; font-size:0.75rem; font-weight: 600; ${badgeStyle}">${method}</span></td>
+                    <td>${new Date(p.created_at).toLocaleString()}</td>
+                </tr>
+            `;
+        }).join('');
     } catch (e) { console.error(e); }
 }
