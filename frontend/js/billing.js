@@ -120,6 +120,13 @@ function printBill(order) {
                                 if (sound) {
                                     sound.play().catch(e => console.log("Sound play error:", e));
                                 }
+
+                                // Voice Notification
+                                if ('speechSynthesis' in window) {
+                                    const msg = new SpeechSynthesisUtterance("Payment Successfully");
+                                    window.speechSynthesis.speak(msg);
+                                }
+
                                 alert("Payment Successful! Order marked as Paid via Scanner.");
                                 window.close();
                             } else {
