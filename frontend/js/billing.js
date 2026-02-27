@@ -14,7 +14,7 @@ function printBill(order) {
         <head>
             <title>Bill - Table ${order.table_number}</title>
             <style>
-                body { font-family: 'Courier New', monospace; padding: 20px; max-width: 400px; margin: 0 auto; }
+                body { font-family: 'Courier New', monospace; padding: 20px; max-width: 400px; margin: 40px auto; font-weight: bold; }
                 .restaurant-name { text-align: center; font-size: 24px; font-weight: bold; margin-bottom: 5px; }
                 .restaurant-info { text-align: center; font-size: 12px; margin-bottom: 20px; border-bottom: 2px dashed #000; padding-bottom: 10px; }
                 .bill-details { margin-bottom: 15px; font-size: 14px; }
