@@ -74,7 +74,9 @@ function initDb() {
         db.run(`CREATE TABLE IF NOT EXISTS payments (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             order_id INTEGER,
+            table_number INTEGER,
             customer_name TEXT,
+            items TEXT,
             total_price REAL,
             payment_method TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP

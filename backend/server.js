@@ -161,11 +161,11 @@ app.put('/api/orders/:id/status', (req, res) => {
 
         // --- PERMANENT ARCHIVAL ---
         if (status === 'Paid') {
-            // Fetch order details to archive
-            db.get("SELECT total_price, customer_name, payment_method FROM orders WHERE id = ?", [req.params.id], (err, order) => {
+            // Fetch order details and items to archive
+            db.get("SELECT o.*, (SELECT GROUP_CONCAT(i.quantity || 'x ' || m.name, ', ') FROM order_items i JOIN menu_items m ON i.menu_item_id = m.id WHERE i.order_id = o.id) as items_summary FROM orders o WHERE o.id = ?", [req.params.id], (err, order) => {
                 if (!err && order) {
-                    db.run("INSERT INTO payments (order_id, customer_name, total_price, payment_method) VALUES (?, ?, ?, ?)",
-                        [req.params.id, order.customer_name, order.total_price, payment_method || order.payment_method || 'Cash']);
+                    db.run("INSERT INTO payments (order_id, table_number, customer_name, items, total_price, payment_method) VALUES (?, ?, ?, ?, ?, ?)",
+                        [req.params.id, order.table_number, order.customer_name, order.items_summary, order.total_price, payment_method || order.payment_method || 'Cash']);
                 }
             });
         }

@@ -192,7 +192,9 @@ async function loadPaymentHistory() {
         tbody.innerHTML = payments.map(p => `
             <tr>
                 <td>#${p.id}</td>
+                <td>T-${p.table_number || '-'}</td>
                 <td>${p.customer_name || 'Guest'}</td>
+                <td style="font-size: 0.75rem; color: #64748b; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${p.items || ''}">${p.items || '-'}</td>
                 <td>₹${(p.total_price * 1.05).toFixed(2)}</td>
                 <td><span class="status-badge" style="background:#e8f5e9; color:#2e7d32; padding:0.25rem 0.5rem; border-radius:4px; font-size:0.75rem;">${p.payment_method || 'Paid'}</span></td>
                 <td>${new Date(p.created_at).toLocaleString()}</td>
