@@ -250,3 +250,64 @@ async function loadOnlinePaymentHistory() {
         `).join('');
     } catch (e) { console.error(e); }
 }
+
+async function showPeriodDetails(period) {
+    try {
+        const modal = document.getElementById('stats-detail-modal');
+        const title = document.getElementById('stats-detail-title');
+        const tbody = document.getElementById('stats-detail-tbody');
+
+        title.innerText = `${period.charAt(0).toUpperCase() + period.slice(1)}'s Detailed Orders`;
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center">Loading...</td></tr>';
+        modal.classList.add('active');
+
+        const payments = await api.getPaymentHistory();
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+
+        const filtered = payments.filter(p => {
+            const pDate = new Date(p.created_at);
+            pDate.setHours(0, 0, 0, 0);
+
+            if (period === 'today') {
+                return pDate.getTime() === now.getTime();
+            } else if (period === 'weekly') {
+                const weekAgo = new Date(now);
+                weekAgo.setDate(now.getDate() - 7);
+                return pDate >= weekAgo;
+            } else if (period === 'monthly') {
+                const monthAgo = new Date(now);
+                monthAgo.setDate(now.getDate() - 30);
+                return pDate >= monthAgo;
+            } else if (period === 'yearly') {
+                const yearAgo = new Date(now);
+                yearAgo.setDate(now.getDate() - 365);
+                return pDate >= yearAgo;
+            }
+            return false;
+        });
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center">No orders found for this period.</td></tr>';
+        } else {
+            tbody.innerHTML = filtered.map(p => `
+                <tr>
+                    <td>#${p.id}</td>
+                    <td>T-${p.table_number || '-'}</td>
+                    <td>${p.customer_name || 'Guest'}</td>
+                    <td style="font-size: 0.75rem; color: #64748b; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${p.items || '-'}</td>
+                    <td>₹${(p.total_price * 1.05).toFixed(2)}</td>
+                    <td>${p.payment_method || 'Cash'}</td>
+                    <td>${new Date(p.created_at).toLocaleString()}</td>
+                </tr>
+            `).join('');
+        }
+    } catch (e) {
+        console.error(e);
+        alert('Failed to load details');
+    }
+}
+
+function closeStatsModal() {
+    document.getElementById('stats-detail-modal').classList.remove('active');
+}

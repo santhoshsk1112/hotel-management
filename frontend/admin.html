@@ -88,8 +88,8 @@
                 <!-- Stats Cards -->
                 <div class="stats-container"
                     style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-                    <div class="card"
-                        style="padding: 1.5rem; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 4px solid #4CAF50;">
+                    <div class="card stat-card-interactive" onclick="showPeriodDetails('today')"
+                        style="padding: 1.5rem; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 4px solid #4CAF50; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;">
                         <div style="font-size: 0.875rem; color: #666; margin-bottom: 0.5rem;">Today's Profit</div>
                         <div id="stats-today"
                             style="font-size: 1.5rem; font-weight: bold; color: #333; margin-bottom: 0.5rem;">₹0.00
@@ -99,8 +99,8 @@
                             0</div>
                         <div id="stats-today-breakdown" style="font-size: 0.75rem; display: flex; gap: 0.5rem;"></div>
                     </div>
-                    <div class="card"
-                        style="padding: 1.5rem; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 4px solid #2196F3;">
+                    <div class="card stat-card-interactive" onclick="showPeriodDetails('weekly')"
+                        style="padding: 1.5rem; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 4px solid #2196F3; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;">
                         <div style="font-size: 0.875rem; color: #666; margin-bottom: 0.5rem;">Weekly Profit</div>
                         <div id="stats-weekly"
                             style="font-size: 1.5rem; font-weight: bold; color: #333; margin-bottom: 0.5rem;">₹0.00
@@ -110,8 +110,8 @@
                             0</div>
                         <div id="stats-weekly-breakdown" style="font-size: 0.75rem; display: flex; gap: 0.5rem;"></div>
                     </div>
-                    <div class="card"
-                        style="padding: 1.5rem; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 4px solid #FF9800;">
+                    <div class="card stat-card-interactive" onclick="showPeriodDetails('monthly')"
+                        style="padding: 1.5rem; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 4px solid #FF9800; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;">
                         <div style="font-size: 0.875rem; color: #666; margin-bottom: 0.5rem;">Monthly Profit</div>
                         <div id="stats-monthly"
                             style="font-size: 1.5rem; font-weight: bold; color: #333; margin-bottom: 0.5rem;">₹0.00
@@ -121,8 +121,8 @@
                             0</div>
                         <div id="stats-monthly-breakdown" style="font-size: 0.75rem; display: flex; gap: 0.5rem;"></div>
                     </div>
-                    <div class="card"
-                        style="padding: 1.5rem; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 4px solid #9C27B0;">
+                    <div class="card stat-card-interactive" onclick="showPeriodDetails('yearly')"
+                        style="padding: 1.5rem; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 4px solid #9C27B0; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;">
                         <div style="font-size: 0.875rem; color: #666; margin-bottom: 0.5rem;">Yearly Profit</div>
                         <div id="stats-yearly"
                             style="font-size: 1.5rem; font-weight: bold; color: #333; margin-bottom: 0.5rem;">₹0.00
@@ -250,6 +250,38 @@
                     <button type="submit" class="btn btn-primary">Save</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Stats Detail Modal -->
+    <div id="stats-detail-modal" class="modal-overlay">
+        <div class="modal" style="max-width: 800px; width: 90%;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem">
+                <h2 id="stats-detail-title">Order Details</h2>
+                <button onclick="closeStatsModal()"
+                    style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            </div>
+            <div style="max-height: 400px; overflow-y: auto;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Table</th>
+                            <th>Customer</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Method</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stats-detail-tbody">
+                        <!-- Filled by JS -->
+                    </tbody>
+                </table>
+            </div>
+            <div style="margin-top: 1.5rem; text-align: right;">
+                <button class="btn" onclick="closeStatsModal()">Close</button>
+            </div>
         </div>
     </div>
 
