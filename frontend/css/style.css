@@ -1,5 +1,45 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
+/* Preloader */
+#preloader {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-dark);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    transition: opacity 0.8s ease, visibility 0.8s;
+}
+
+.loader-spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(99, 102, 241, 0.1);
+    border-top: 3px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1.5rem;
+}
+
+#preloader p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
 :root {
     --primary: #6366f1;
     --primary-dark: #4f46e5;
@@ -30,7 +70,7 @@ body {
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(20px);
     }
 
     to {
@@ -39,8 +79,36 @@ body {
     }
 }
 
+@keyframes bgMove {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes glow {
+    0% {
+        box-shadow: 0 0 5px var(--primary);
+    }
+
+    50% {
+        box-shadow: 0 0 20px var(--primary);
+    }
+
+    100% {
+        box-shadow: 0 0 5px var(--primary);
+    }
+}
+
 .fade-in {
-    animation: fadeIn 0.5s ease-out forwards;
+    animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Auth Page */
@@ -49,29 +117,62 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background: radial-gradient(circle at top right, #6366f120, transparent),
-        radial-gradient(circle at bottom left, #ec489920, transparent);
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity 1s ease;
+}
+
+.auth-container.loaded {
+    opacity: 1;
+}
+
+.auth-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.8)),
+        url('../img/hotel_bg.png');
+    background-size: cover;
+    background-position: center;
+    z-index: -1;
+    animation: bgMove 20s ease-in-out infinite;
 }
 
 .login-card {
-    background: rgba(30, 41, 59, 0.7);
-    backdrop-filter: blur(10px);
-    padding: 2.5rem;
-    border-radius: 1rem;
+    background: rgba(30, 41, 59, 0.75);
+    backdrop-filter: blur(20px);
+    padding: 3rem;
+    border-radius: 1.5rem;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     width: 100%;
-    max-width: 400px;
+    max-width: 450px;
     text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.login-card:hover {
+    transform: translateY(-5px);
 }
 
 .login-card h1 {
     margin-bottom: 0.5rem;
-    font-size: 1.8rem;
-    background: linear-gradient(to right, #818cf8, #c084fc);
+    font-size: 2.2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #818cf8, #c084fc, #ec4899);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    transition: all 0.5s ease;
+}
+
+.login-card h1:hover {
+    filter: drop-shadow(0 0 8px rgba(129, 140, 248, 0.5));
+    transform: scale(1.02);
 }
 
 .login-card p {
@@ -107,38 +208,71 @@ body {
 
 .form-input {
     width: 100%;
-    padding: 0.75rem 1rem;
-    background: rgba(15, 23, 42, 0.6);
+    padding: 0.875rem 1.25rem;
+    background: rgba(15, 23, 42, 0.4);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 0.5rem;
+    border-radius: 0.75rem;
     color: white;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
 }
 
 .form-input:focus {
-    outline: none;
+    background: rgba(15, 23, 42, 0.6);
     border-color: var(--primary);
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+    transform: scale(1.01);
+}
+
+.form-input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+    transition: opacity 0.3s;
+}
+
+.form-input:focus::placeholder {
+    opacity: 0.5;
 }
 
 .btn {
     width: 100%;
-    padding: 0.75rem;
+    padding: 0.875rem;
     border: none;
-    border-radius: 0.5rem;
+    border-radius: 0.75rem;
     font-weight: 600;
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
 }
 
 .btn-primary {
     background: linear-gradient(135deg, var(--primary), var(--primary-dark));
     color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transform: rotate(45deg);
+    transition: transform 0.5s;
+}
+
+.btn-primary:hover::after {
+    transform: rotate(45deg) translate(50%, 50%);
 }
 
 .btn-primary:hover {
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-    transform: translateY(-1px);
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+    transform: translateY(-2px);
 }
 
 .btn-danger {

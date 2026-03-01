@@ -9,7 +9,12 @@
 </head>
 
 <body>
-    <div class="auth-container">
+    <div id="preloader">
+        <div class="loader-spinner"></div>
+        <p>TN Delights</p>
+    </div>
+
+    <div class="auth-container" id="authContainer">
         <div class="login-card fade-in">
             <h1>TN Delights</h1>
             <p>Hotel Dining Management</p>
@@ -40,6 +45,20 @@
         </div>
     </div>
 
+    <script>
+        // Preloader handling
+        window.addEventListener('load', () => {
+            const preloader = document.getElementById('preloader');
+            const authContainer = document.getElementById('authContainer');
+
+            // Allow a small delay for visual impact
+            setTimeout(() => {
+                preloader.style.opacity = '0';
+                preloader.style.visibility = 'hidden';
+                authContainer.classList.add('loaded');
+            }, 1000);
+        });
+    </script>
     <script src="js/api.js"></script>
     <script>
         const loginForm = document.getElementById('loginForm');
