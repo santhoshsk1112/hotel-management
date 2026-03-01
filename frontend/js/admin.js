@@ -220,6 +220,9 @@ async function loadPaymentHistory() {
                     <td>₹${(p.total_price * 1.05).toFixed(2)}</td>
                     <td><span class="status-badge" style="padding:0.25rem 0.5rem; border-radius:4px; font-size:0.75rem; font-weight: 600; ${badgeStyle}">${method}</span></td>
                     <td>${new Date(p.created_at).toLocaleString()}</td>
+                    <td>
+                        <button style="color:red; background:none; border:none; cursor:pointer;" onclick="deletePaymentAction(${p.id})">Delete</button>
+                    </td>
                 </tr>
             `;
         }).join('');
@@ -246,6 +249,9 @@ async function loadOnlinePaymentHistory() {
                 <td>${p.customer_name || 'Guest'}</td>
                 <td>₹${(p.total_price * 1.05).toFixed(2)}</td>
                 <td>${new Date(p.created_at).toLocaleString()}</td>
+                <td>
+                    <button style="color:red; background:none; border:none; cursor:pointer;" onclick="deletePaymentAction(${p.id})">Delete</button>
+                </td>
             </tr>
         `).join('');
     } catch (e) { console.error(e); }
@@ -299,6 +305,9 @@ async function showPeriodDetails(period) {
                     <td>₹${(p.total_price * 1.05).toFixed(2)}</td>
                     <td>${p.payment_method || 'Cash'}</td>
                     <td>${new Date(p.created_at).toLocaleString()}</td>
+                    <td>
+                        <button style="color:red; background:none; border:none; cursor:pointer;" onclick="deletePaymentAction(${p.id}, '${period}')">Delete</button>
+                    </td>
                 </tr>
             `).join('');
         }
@@ -310,4 +319,23 @@ async function showPeriodDetails(period) {
 
 function closeStatsModal() {
     document.getElementById('stats-detail-modal').classList.remove('active');
+}
+
+async function deletePaymentAction(id, period) {
+    if (confirm('Are you sure you want to permanently delete this payment record?')) {
+        try {
+            await api.deletePayment(id);
+            // Refresh tables
+            loadPaymentStats();
+            loadPaymentHistory();
+            loadOnlinePaymentStats();
+            loadOnlinePaymentHistory();
+            if (period) {
+                showPeriodDetails(period);
+            }
+        } catch (e) {
+            console.error('Error deleting payment:', e);
+            alert('Failed to delete payment');
+        }
+    }
 }

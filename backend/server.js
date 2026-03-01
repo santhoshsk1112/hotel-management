@@ -237,6 +237,13 @@ app.get('/api/payments/history', (req, res) => {
     });
 });
 
+app.delete('/api/payments/:id', (req, res) => {
+    db.run("DELETE FROM payments WHERE id = ?", req.params.id, function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: 'Deleted' });
+    });
+});
+
 // --- ONLINE PAYMENT HISTORY (SCANNER ONLY) ---
 app.get('/api/payments/online/stats', (req, res) => {
     const sql = `

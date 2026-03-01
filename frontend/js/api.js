@@ -92,5 +92,10 @@ const api = {
     getOnlinePaymentHistory: async () => {
         const res = await fetch(`${API_URL}/payments/online/history`);
         return res.json();
+    },
+
+    deletePayment: async (id) => {
+        const res = await fetch(`${API_URL}/payments/${id}`, { method: 'DELETE' });
+        return res.json();
     }
 };

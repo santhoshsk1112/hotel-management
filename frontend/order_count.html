@@ -23,6 +23,10 @@
             transition: transform 0.3s ease;
         }
 
+        .stat-card-interactive {
+            cursor: pointer;
+        }
+
         .stat-card:hover {
             transform: translateY(-5px);
         }
@@ -73,22 +77,26 @@
             </header>
 
             <div class="stats-grid">
-                <div class="stat-card" style="border-top-color: #4CAF50;">
+                <div class="stat-card stat-card-interactive" style="border-top-color: #4CAF50;"
+                    onclick="showPeriodDetails('today')">
                     <div class="stat-label">Daily Orders</div>
                     <div id="count-today" class="stat-value">0</div>
                     <div class="stat-subtext">Total orders taken today</div>
                 </div>
-                <div class="stat-card" style="border-top-color: #2196F3;">
+                <div class="stat-card stat-card-interactive" style="border-top-color: #2196F3;"
+                    onclick="showPeriodDetails('weekly')">
                     <div class="stat-label">Weekly Orders</div>
                     <div id="count-weekly" class="stat-value">0</div>
                     <div class="stat-subtext">Last 7 days volume</div>
                 </div>
-                <div class="stat-card" style="border-top-color: #FF9800;">
+                <div class="stat-card stat-card-interactive" style="border-top-color: #FF9800;"
+                    onclick="showPeriodDetails('monthly')">
                     <div class="stat-label">Monthly Orders</div>
                     <div id="count-monthly" class="stat-value">0</div>
                     <div class="stat-subtext">Last 30 days volume</div>
                 </div>
-                <div class="stat-card" style="border-top-color: #9C27B0;">
+                <div class="stat-card stat-card-interactive" style="border-top-color: #9C27B0;"
+                    onclick="showPeriodDetails('yearly')">
                     <div class="stat-label">Yearly Orders</div>
                     <div id="count-yearly" class="stat-value">0</div>
                     <div class="stat-subtext">Current year performance</div>
@@ -109,6 +117,39 @@
         </main>
     </div>
 
+    <!-- Stats Detail Modal -->
+    <div id="stats-detail-modal" class="modal-overlay">
+        <div class="modal" style="max-width: 800px; width: 90%;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem">
+                <h2 id="stats-detail-title">Order Details</h2>
+                <button onclick="closeStatsModal()"
+                    style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            </div>
+            <div style="max-height: 400px; overflow-y: auto;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Table</th>
+                            <th>Customer</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Method</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stats-detail-tbody">
+                        <!-- Filled by JS -->
+                    </tbody>
+                </table>
+            </div>
+            <div style="margin-top: 1.5rem; text-align: right;">
+                <button class="btn" onclick="closeStatsModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
     <script src="js/api.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -124,6 +165,85 @@
                 document.getElementById('count-yearly').innerText = stats.yearly_count || 0;
             } catch (e) {
                 console.error('Error loading stats:', e);
+            }
+        }
+
+        async function showPeriodDetails(period) {
+            try {
+                const modal = document.getElementById('stats-detail-modal');
+                const title = document.getElementById('stats-detail-title');
+                const tbody = document.getElementById('stats-detail-tbody');
+
+                title.innerText = `${period.charAt(0).toUpperCase() + period.slice(1)}'s Detailed Orders`;
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center">Loading...</td></tr>';
+                modal.classList.add('active');
+
+                const payments = await api.getPaymentHistory();
+                const now = new Date();
+                now.setHours(0, 0, 0, 0);
+
+                const filtered = payments.filter(p => {
+                    const pDate = new Date(p.created_at);
+                    pDate.setHours(0, 0, 0, 0);
+
+                    if (period === 'today') {
+                        return pDate.getTime() === now.getTime();
+                    } else if (period === 'weekly') {
+                        const weekAgo = new Date(now);
+                        weekAgo.setDate(now.getDate() - 7);
+                        return pDate >= weekAgo;
+                    } else if (period === 'monthly') {
+                        const monthAgo = new Date(now);
+                        monthAgo.setDate(now.getDate() - 30);
+                        return pDate >= monthAgo;
+                    } else if (period === 'yearly') {
+                        const yearAgo = new Date(now);
+                        yearAgo.setDate(now.getDate() - 365);
+                        return pDate >= yearAgo;
+                    }
+                    return false;
+                });
+
+                if (filtered.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center">No orders found for this period.</td></tr>';
+                } else {
+                    tbody.innerHTML = filtered.map(p => `
+                        <tr>
+                            <td>#${p.id}</td>
+                            <td>T-${p.table_number || '-'}</td>
+                            <td>${p.customer_name || 'Guest'}</td>
+                            <td style="font-size: 0.75rem; color: #64748b; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${p.items || '-'}</td>
+                            <td>₹${(p.total_price * 1.05).toFixed(2)}</td>
+                            <td>${p.payment_method || 'Cash'}</td>
+                            <td>${new Date(p.created_at).toLocaleString()}</td>
+                            <td>
+                                <button style="color:red; background:none; border:none; cursor:pointer;" onclick="deletePaymentAction(${p.id}, '${period}')">Delete</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Failed to load details');
+            }
+        }
+
+        function closeStatsModal() {
+            document.getElementById('stats-detail-modal').classList.remove('active');
+        }
+
+        async function deletePaymentAction(id, period) {
+            if (confirm('Are you sure you want to permanently delete this payment record?')) {
+                try {
+                    await api.deletePayment(id);
+                    loadOrderStats();
+                    if (period) {
+                        showPeriodDetails(period);
+                    }
+                } catch (e) {
+                    console.error('Error deleting payment:', e);
+                    alert('Failed to delete payment');
+                }
             }
         }
 
