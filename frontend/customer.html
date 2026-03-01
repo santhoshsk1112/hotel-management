@@ -135,20 +135,24 @@
 <body>
 
     <!-- Table Entry Screen -->
-    <div id="table-entry-overlay">
-        <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">🥘</h1>
-        <h1 style="margin-bottom: 1rem;">Welcome to <br><span style="color:var(--primary)">TN Delights</span></h1>
-        <p style="color: var(--text-muted); margin-bottom: 2rem;">Authentic Tamil Nadu Cuisine</p>
+    <div id="table-entry-overlay" class="auth-container loaded" style="background: transparent;">
+        <div class="login-card fade-in" style="margin: 1.5rem;">
+            <div style="font-size: 3.5rem; margin-bottom: 0.5rem; background: none; -webkit-text-fill-color: initial;">
+                🥘</div>
+            <h1 style="margin-bottom: 1rem;">Welcome to <br>TN Delights</h1>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">Authentic Tamil Nadu Cuisine</p>
 
-        <div class="form-group" style="width: 100%; max-width: 300px;">
-            <label style="text-align:center;">Enter Your Name</label>
-            <input type="text" id="guest-name" class="form-input" style="text-align: center; font-size: 1.5rem;"
-                placeholder="Your Name">
-            <label style="text-align:center; margin-top: 1rem;">Enter Your Table Number</label>
-            <input type="number" id="guest-table-num" class="form-input" style="text-align: center; font-size: 1.5rem;"
-                min="1" placeholder="#">
+            <div class="form-group" style="width: 100%; max-width: 300px; margin: 0 auto;">
+                <label style="text-align:center;">Enter Your Name</label>
+                <input type="text" id="guest-name" class="form-input" style="text-align: center; font-size: 1.5rem;"
+                    placeholder="Your Name">
+                <label style="text-align:center; margin-top: 1rem;">Enter Your Table Number</label>
+                <input type="number" id="guest-table-num" class="form-input"
+                    style="text-align: center; font-size: 1.5rem;" min="1" placeholder="#">
+            </div>
+            <button class="btn btn-primary" onclick="startOrdering()"
+                style="width: 100%; max-width: 300px; margin: 1.5rem auto 0 auto;">Start Ordering</button>
         </div>
-        <button class="btn btn-primary" onclick="startOrdering()" style="max-width: 300px;">Start Ordering</button>
     </div>
 
     <!-- Main Ordering Interface -->
