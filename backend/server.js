@@ -186,18 +186,22 @@ app.get('/api/payments/stats', (req, res) => {
     const sql = `
         SELECT 
             SUM(CASE WHEN date(created_at) = date('now') THEN total_price * 1.05 ELSE 0 END) as today,
+            COUNT(CASE WHEN date(created_at) = date('now') THEN 1 END) as today_count,
             SUM(CASE WHEN date(created_at) = date('now') AND payment_method = 'Scanner' THEN total_price * 1.05 ELSE 0 END) as today_scanner,
             SUM(CASE WHEN date(created_at) = date('now') AND (payment_method IS NULL OR payment_method != 'Scanner') THEN total_price * 1.05 ELSE 0 END) as today_cash,
 
             SUM(CASE WHEN date(created_at) >= date('now', '-7 days') THEN total_price * 1.05 ELSE 0 END) as weekly,
+            COUNT(CASE WHEN date(created_at) >= date('now', '-7 days') THEN 1 END) as weekly_count,
             SUM(CASE WHEN date(created_at) >= date('now', '-7 days') AND payment_method = 'Scanner' THEN total_price * 1.05 ELSE 0 END) as weekly_scanner,
             SUM(CASE WHEN date(created_at) >= date('now', '-7 days') AND (payment_method IS NULL OR payment_method != 'Scanner') THEN total_price * 1.05 ELSE 0 END) as weekly_cash,
 
             SUM(CASE WHEN date(created_at) >= date('now', '-30 days') THEN total_price * 1.05 ELSE 0 END) as monthly,
+            COUNT(CASE WHEN date(created_at) >= date('now', '-30 days') THEN 1 END) as monthly_count,
             SUM(CASE WHEN date(created_at) >= date('now', '-30 days') AND payment_method = 'Scanner' THEN total_price * 1.05 ELSE 0 END) as monthly_scanner,
             SUM(CASE WHEN date(created_at) >= date('now', '-30 days') AND (payment_method IS NULL OR payment_method != 'Scanner') THEN total_price * 1.05 ELSE 0 END) as monthly_cash,
 
             SUM(CASE WHEN date(created_at) >= date('now', '-365 days') THEN total_price * 1.05 ELSE 0 END) as yearly,
+            COUNT(CASE WHEN date(created_at) >= date('now', '-365 days') THEN 1 END) as yearly_count,
             SUM(CASE WHEN date(created_at) >= date('now', '-365 days') AND payment_method = 'Scanner' THEN total_price * 1.05 ELSE 0 END) as yearly_scanner,
             SUM(CASE WHEN date(created_at) >= date('now', '-365 days') AND (payment_method IS NULL OR payment_method != 'Scanner') THEN total_price * 1.05 ELSE 0 END) as yearly_cash
         FROM payments
@@ -206,15 +210,19 @@ app.get('/api/payments/stats', (req, res) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json({
             today: row.today || 0,
+            today_count: row.today_count || 0,
             today_scanner: row.today_scanner || 0,
             today_cash: row.today_cash || 0,
             weekly: row.weekly || 0,
+            weekly_count: row.weekly_count || 0,
             weekly_scanner: row.weekly_scanner || 0,
             weekly_cash: row.weekly_cash || 0,
             monthly: row.monthly || 0,
+            monthly_count: row.monthly_count || 0,
             monthly_scanner: row.monthly_scanner || 0,
             monthly_cash: row.monthly_cash || 0,
             yearly: row.yearly || 0,
+            yearly_count: row.yearly_count || 0,
             yearly_scanner: row.yearly_scanner || 0,
             yearly_cash: row.yearly_cash || 0
         });

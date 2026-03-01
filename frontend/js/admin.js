@@ -184,18 +184,19 @@ async function loadPaymentStats() {
     try {
         const stats = await api.getPaymentStats();
 
-        const renderStat = (id, total, cash, scanner) => {
+        const renderStat = (id, total, cash, scanner, count) => {
             document.getElementById(`stats-${id}`).innerText = `₹${total.toFixed(2)}`;
+            document.getElementById(`stats-${id}-count`).innerText = `Orders: ${count}`;
             document.getElementById(`stats-${id}-breakdown`).innerHTML = `
                 <span style="color: #15803d;">Cash: ₹${cash.toFixed(2)}</span>
                 <span style="color: #0369a1;">Scanner: ₹${scanner.toFixed(2)}</span>
             `;
         };
 
-        renderStat('today', stats.today, stats.today_cash, stats.today_scanner);
-        renderStat('weekly', stats.weekly, stats.weekly_cash, stats.weekly_scanner);
-        renderStat('monthly', stats.monthly, stats.monthly_cash, stats.monthly_scanner);
-        renderStat('yearly', stats.yearly, stats.yearly_cash, stats.yearly_scanner);
+        renderStat('today', stats.today, stats.today_cash, stats.today_scanner, stats.today_count);
+        renderStat('weekly', stats.weekly, stats.weekly_cash, stats.weekly_scanner, stats.weekly_count);
+        renderStat('monthly', stats.monthly, stats.monthly_cash, stats.monthly_scanner, stats.monthly_count);
+        renderStat('yearly', stats.yearly, stats.yearly_cash, stats.yearly_scanner, stats.yearly_count);
     } catch (e) { console.error(e); }
 }
 
