@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Statistics - Admin Panel</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            padding: 2rem;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border-top: 4px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #64748b;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-subtext {
+            font-size: 0.875rem;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container" style="grid-template-columns: 250px 1fr;">
+        <aside class="sidebar">
+            <div class="logo">
+                <span>🛡️ Admin Panel</span>
+            </div>
+            <a href="admin.html" class="nav-item">Menu Management</a>
+            <a href="admin.html?tab=orders" class="nav-item">Order History</a>
+            <a href="admin.html?tab=payments" class="nav-item">Payment History</a>
+            <a href="admin.html?tab=online-payments" class="nav-item">Online History</a>
+            <a href="order_count.html" class="nav-item active">Order Statistics</a>
+            <div style="margin-top: auto;">
+                <button class="nav-item" onclick="logout()">Logout</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header style="margin-bottom: 2.5rem;">
+                <h1 style="font-size: 1.875rem; color: #1e293b; margin-bottom: 0.5rem;">Order Statistics</h1>
+                <p style="color: #64748b;">Comprehensive overview of order volumes across different time periods.</p>
+            </header>
+
+            <div class="stats-grid">
+                <div class="stat-card" style="border-top-color: #4CAF50;">
+                    <div class="stat-label">Daily Orders</div>
+                    <div id="count-today" class="stat-value">0</div>
+                    <div class="stat-subtext">Total orders taken today</div>
+                </div>
+                <div class="stat-card" style="border-top-color: #2196F3;">
+                    <div class="stat-label">Weekly Orders</div>
+                    <div id="count-weekly" class="stat-value">0</div>
+                    <div class="stat-subtext">Last 7 days volume</div>
+                </div>
+                <div class="stat-card" style="border-top-color: #FF9800;">
+                    <div class="stat-label">Monthly Orders</div>
+                    <div id="count-monthly" class="stat-value">0</div>
+                    <div class="stat-subtext">Last 30 days volume</div>
+                </div>
+                <div class="stat-card" style="border-top-color: #9C27B0;">
+                    <div class="stat-label">Yearly Orders</div>
+                    <div id="count-yearly" class="stat-value">0</div>
+                    <div class="stat-subtext">Current year performance</div>
+                </div>
+            </div>
+
+            <div class="card" style="padding: 2rem;">
+                <h2 style="margin-bottom: 1.5rem; font-size: 1.25rem;">Statistical Insights</h2>
+                <div style="color: #475569; line-height: 1.6;">
+                    <p>This page provides a focused view of your hotel's dining traffic. Tracking order volumes
+                        separately from profit helps you understand operational load and staffing requirements during
+                        peak periods.</p>
+                    <br>
+                    <button class="btn btn-primary" style="width: auto;" onclick="loadOrderStats()">🔄 Refresh
+                        Data</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            loadOrderStats();
+        });
+
+        async function loadOrderStats() {
+            try {
+                const stats = await api.getPaymentStats();
+                document.getElementById('count-today').innerText = stats.today_count || 0;
+                document.getElementById('count-weekly').innerText = stats.weekly_count || 0;
+                document.getElementById('count-monthly').innerText = stats.monthly_count || 0;
+                document.getElementById('count-yearly').innerText = stats.yearly_count || 0;
+            } catch (e) {
+                console.error('Error loading stats:', e);
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+
+</html>
