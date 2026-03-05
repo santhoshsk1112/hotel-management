@@ -221,6 +221,7 @@ async function loadPaymentHistory() {
                     <td><span class="status-badge" style="padding:0.25rem 0.5rem; border-radius:4px; font-size:0.75rem; font-weight: 600; ${badgeStyle}">${method}</span></td>
                     <td>${new Date(p.created_at).toLocaleString()}</td>
                     <td>
+                        <button class="btn btn-sm" style="padding: 2px 8px; font-size: 0.7rem; background: #f1f5f9; border: 1px solid #cbd5e1; margin-right: 5px;" onclick='alert("Items: " + ${JSON.stringify(p.items || "No items")})'>Details</button>
                         <button style="color:red; background:none; border:none; cursor:pointer;" onclick="deletePaymentAction(${p.id})">Delete</button>
                     </td>
                 </tr>
@@ -273,35 +274,33 @@ async function showPeriodDetails(period) {
 
         const filtered = payments.filter(p => {
             const pDate = new Date(p.created_at);
-            pDate.setHours(0, 0, 0, 0);
+            const pDateDay = new Date(pDate.getFullYear(), pDate.getMonth(), pDate.getDate()).getTime();
+            const todayDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
 
             if (period === 'today') {
-                return pDate.getTime() === now.getTime();
+                return pDateDay === todayDay;
             } else if (period === 'weekly') {
-                const weekAgo = new Date(now);
-                weekAgo.setDate(now.getDate() - 7);
-                return pDate >= weekAgo;
+                const weekAgo = todayDay - (7 * 24 * 60 * 60 * 1000);
+                return pDateDay >= weekAgo;
             } else if (period === 'monthly') {
-                const monthAgo = new Date(now);
-                monthAgo.setDate(now.getDate() - 30);
-                return pDate >= monthAgo;
+                const monthAgo = todayDay - (30 * 24 * 60 * 60 * 1000);
+                return pDateDay >= monthAgo;
             } else if (period === 'yearly') {
-                const yearAgo = new Date(now);
-                yearAgo.setDate(now.getDate() - 365);
-                return pDate >= yearAgo;
+                const yearAgo = todayDay - (365 * 24 * 60 * 60 * 1000);
+                return pDateDay >= yearAgo;
             }
             return false;
         });
 
         if (filtered.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center">No orders found for this period.</td></tr>';
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center">No orders found for ${period}.</td></tr>`;
         } else {
             tbody.innerHTML = filtered.map(p => `
                 <tr>
                     <td>#${p.id}</td>
                     <td>T-${p.table_number || '-'}</td>
                     <td>${p.customer_name || 'Guest'}</td>
-                    <td style="font-size: 0.75rem; color: #64748b; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${p.items || '-'}</td>
+                    <td style="font-size: 0.75rem; color: #64748b; white-space: normal; word-break: break-all; min-width: 150px;">${p.items || '-'}</td>
                     <td>₹${(p.total_price * 1.05).toFixed(2)}</td>
                     <td>${p.payment_method || 'Cash'}</td>
                     <td>${new Date(p.created_at).toLocaleString()}</td>
